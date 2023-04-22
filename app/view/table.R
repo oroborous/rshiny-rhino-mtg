@@ -1,5 +1,5 @@
 box::use(
-  shiny[moduleServer, NS, reactive],
+  shiny[moduleServer, NS],
   reactable[reactableOutput, renderReactable],
 )
 box::use(
@@ -13,9 +13,10 @@ ui <- function (id) {
 }
 
 #' @export
-server <- function (id) {
+server <- function (id, data) {
   moduleServer(id, function(input, output, session) {
-    data <- reactive(rhinos$fetch_data())
+    # refactored to receive data reactive as argument
+    # data <- reactive(rhinos$fetch_data())
     output$table <- renderReactable(
       rhinos$table(data())
     )
