@@ -2,8 +2,7 @@ box::use(
   shiny[bootstrapPage, moduleServer, NS, reactive],
 )
 box::use(
-  app/view/table,
-  app/view/chart,
+  app/view[table, chart],
   app/logic/rhinos
 )
 
