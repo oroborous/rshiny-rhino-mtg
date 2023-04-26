@@ -1,4 +1,16 @@
 /* > rhino::build_sass() */
+/* OR */
+/* > rhino::build_sass(watch = TRUE) */
+
+@mixin shadow {
+  box-shadow:
+    0 4px 8px 0 rgba(0,0,0,0.2),
+    0 6px 20px 0 rgba(0,0,0,0.2);
+}
+
+body {
+  margin: 20px;
+}
 
 .grid {
   display: grid;
@@ -7,5 +19,6 @@
 }
 
 .card {
+  @include shadow;
   padding: 10px;
 }
