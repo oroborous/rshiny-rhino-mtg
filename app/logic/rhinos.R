@@ -3,7 +3,8 @@ box::use(
   reactable[reactable],
   rhino,
   tidyr,
-  echarts4r
+  echarts4r,
+  htmlwidgets[JS]
 )
 
 # connect to DB?
@@ -28,6 +29,6 @@ chart <- function(data) {
     dplyr$group_by(Species) |>
     echarts4r$e_chart(Year) |>
     echarts4r$e_line(Population) |>
-    echarts4r$e_x_axis(Year) |>
+    echarts4r$e_x_axis(Year, formatter = JS("App.formatYear")) |>
     echarts4r$e_tooltip()
 }
