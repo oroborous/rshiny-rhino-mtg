@@ -2,8 +2,12 @@
 
 box::use(
   shiny[actionButton, column, div, fluidRow,
-        h2, moduleServer, NS, observeEvent],
+        h2, moduleServer, NS, observeEvent, reactive],
   shiny.router[change_page],
+  reactable[reactableOutput, renderReactable, getReactableState],
+)
+box::use(
+  app/logic/mtg
 )
 
 #' @export
@@ -21,6 +25,10 @@ ui <- function(id) {
           class="btn-primary btn-lg"
         )
       )
+    ),
+    column(
+      width=6,
+      reactableOutput(ns("table"))
     )
   )
 }
@@ -28,6 +36,10 @@ ui <- function(id) {
 #' @export
 server <- function (id, data) {
   moduleServer(id, function(input, output, session) {
+    output$table <- renderReactable(
+      mtg$table(data())
+    )
+
     observeEvent(input$go_to_types, {
       change_page("types")
     })

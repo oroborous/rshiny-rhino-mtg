@@ -6,7 +6,7 @@ box::use(
 )
 box::use(
   app/view[collection, cards_by_set, cards_by_type, price_history, trades, list, page_404],
-  app/logic/rhinos
+  app/logic/mtg
 )
 
 grid <- function(...) div(class="grid", ...)
@@ -59,7 +59,7 @@ server <- function(id) {
   moduleServer(id, function(input, output, session) {
     router_server("/")
 
-    data <- reactive(rhinos$fetch_data())
+    data <- reactive(mtg$fetch_set_data())
 
     collection$server("collection")
     cards_by_set$server("sets", data)
