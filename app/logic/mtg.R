@@ -17,7 +17,7 @@ con <- DBI::dbConnect(RPostgres::Postgres(),
                       password="T1t@nPps",
                       port=5432)
 
-df_sets <- DBI::dbGetQuery(con, "select code, name, releasedate from mtg_sets order by releasedate, name")
+df_sets <- DBI::dbGetQuery(con, "select code, name, releasedate, totalsetsize from mtg_sets order by releasedate, name")
 
 #' @export
 fetch_set_data <- function() {
@@ -28,6 +28,15 @@ fetch_set_data <- function() {
 table <- function(data) {
   data |>
     reactable()
+}
+
+#' @export
+chart <- function(data) {
+  data |>
+    echarts4r$e_chart(code) |>
+    echarts4r$e_bar(totalsetsize) |>
+   # echarts4r$e_x_axis(Year, formatter = JS("App.formatYear")) |>
+    echarts4r$e_tooltip()
 }
 
 #' @export

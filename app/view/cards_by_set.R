@@ -5,6 +5,7 @@ box::use(
         h2, moduleServer, NS, observeEvent, reactive, selectInput],
   shiny.router[change_page],
   reactable[reactableOutput, renderReactable, getReactableState],
+  echarts4r[echarts4rOutput, renderEcharts4r],
 )
 box::use(
   app/logic/mtg
@@ -28,19 +29,22 @@ ui <- function(id) {
             )
         ),
         div(class="row",
+            div(class="col-12",
+                echarts4rOutput(ns("chart"))
+
+            )
+        ),
+        div(class="row",
             div(class="col-10",
                 reactableOutput(ns("table"))
             ),
-            div(class="col-2",
+            div(class="col-2 offset-10",
                 actionButton(
                   inputId=ns("go_to_types"),
                   label="Your Cards by Type",
                   class="btn-primary btn-lg"
                 )
             )
-        ),
-        div(class="row",
-
         )
     )
   )
@@ -51,6 +55,10 @@ server <- function (id, data) {
   moduleServer(id, function(input, output, session) {
     output$table <- renderReactable(
       mtg$table(data())
+    )
+
+    output$chart <- renderEcharts4r(
+      mtg$chart(data())
     )
 
     observeEvent(input$go_to_types, {
