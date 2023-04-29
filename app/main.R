@@ -2,7 +2,7 @@ box::use(
   shiny[bootstrapPage, moduleServer, NS, reactive,
         titlePanel, div, tags, a],
   shiny.router[router_ui, router_server,
-               route, route_link]
+               route, route_link],
 )
 box::use(
   app/view[collection, cards_by_set, cards_by_type, price_history, trades, list, page_404],

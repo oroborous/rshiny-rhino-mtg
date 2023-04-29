@@ -24,7 +24,8 @@ ui <- function(id) {
           label="Your Cards by Type",
           class="btn-primary btn-lg"
         )
-      )
+      ),
+      mtg$set_picker_input()
     ),
     column(
       width=6,

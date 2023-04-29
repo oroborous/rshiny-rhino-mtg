@@ -7,6 +7,7 @@ box::use(
   tidyr,
   echarts4r,
   htmlwidgets[JS],
+  shinyWidgets[pickerInput],
 )
 
 con <- DBI::dbConnect(RPostgres::Postgres(),
@@ -27,4 +28,11 @@ fetch_set_data <- function() {
 table <- function(data) {
   data |>
     reactable()
+}
+
+#' @export
+set_picker_input <- function() {
+  pickerInput("set", "Card Set(s)", c(df_sets$name),
+              options=list('actions-box'=TRUE),
+              multiple=TRUE)
 }
