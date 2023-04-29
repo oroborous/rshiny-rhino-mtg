@@ -1,4 +1,7 @@
 # This file allows packrat (used by rsconnect during deployment) to pick up dependencies.
+# in R console
+# renv::snapshot()
+
 library(rhino)
 library(dplyr)
 library(tidyr)

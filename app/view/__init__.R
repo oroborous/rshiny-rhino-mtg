@@ -5,5 +5,6 @@
 box::use(
   app/view/chart,
   app/view/table,
-  app/view/intro
+  app/view/intro,
+  app/view/page_404
 )

@@ -1,9 +1,11 @@
 box::use(
-  shiny[bootstrapPage, moduleServer, NS, reactive, titlePanel, div, tags, a],
-  shiny.router[router_ui, router_server, route, route_link]
+  shiny[bootstrapPage, moduleServer, NS, reactive,
+        titlePanel, div, tags, a],
+  shiny.router[router_ui, router_server,
+               route, route_link]
 )
 box::use(
-  app/view[table, chart, intro],
+  app/view[table, chart, intro, page_404],
   app/logic/rhinos
 )
 
@@ -33,16 +35,10 @@ ui <- function(id) {
     router_ui(
       route("/", intro$ui(ns("intro"))),
       route("table", table$ui(ns("table"))),
-      route("chart", chart$ui(ns("chart")))
+      route("chart", chart$ui(ns("chart"))),
+      page_404 = page_404$ui(ns("page_404"))
     )
   )
-  #bootstrapPage(
-  #  titlePanel("Rhino population over time"),
-  #  grid(
-  #    card(chart$ui(ns("chart"))),
-  #    card(table$ui(ns("table")))
-  #  )
-  #)
 }
 
 #' @export
