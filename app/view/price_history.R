@@ -20,10 +20,13 @@ ui <- function(id) {
     div(class="container",
         div(class="row",
             div(class="col-3",
-                selectInput("ordering", "Order By", c("Release Date", "Percent Complete"))
+                selectInput("breakout", "Breakout By", c("Card Type", "Card Color"))
             ),
             div(class="col-3",
-                selectInput("showing", "Show", c("Card Count", "Dollars"))
+                selectInput("showing_set", "Price type for all set cards", c("Purchase Price", "Selling Price"))
+            ),
+            div(class="col-3",
+                selectInput("showing_owned", "Price type for your set cards", c("Purchase Price", "Selling Price"))
             ),
             div(class="col",
                 mtg$set_picker_input()

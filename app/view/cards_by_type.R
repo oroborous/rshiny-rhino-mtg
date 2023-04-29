@@ -20,7 +20,7 @@ ui <- function(id) {
     div(class="container",
         div(class="row",
             div(class="col-3",
-                selectInput("ordering", "Order By", c("Release Date", "Percent Complete"))
+                selectInput("ordering", "Order By", c("Cards in Set", "Percent Complete"))
             ),
             div(class="col-3",
                 selectInput("showing", "Show", c("Card Count", "Dollars"))

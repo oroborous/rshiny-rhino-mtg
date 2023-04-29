@@ -19,10 +19,8 @@ ui <- function(id) {
     div(class="container",
         div(class="row",
             div(class="col-3",
-                selectInput("ordering", "Order By", c("Release Date", "Percent Complete"))
-            ),
-            div(class="col-3",
-                selectInput("showing", "Show", c("Card Count", "Dollars"))
+                selectInput("hiding", "Hide cards with less than",
+                            c("Show All", "4 copies owned", "8 copies owned"))
             ),
             div(class="col",
                 mtg$set_picker_input()
