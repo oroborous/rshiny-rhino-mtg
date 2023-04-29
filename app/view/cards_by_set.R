@@ -6,6 +6,7 @@ box::use(
   shiny.router[change_page],
   reactable[reactableOutput, renderReactable, getReactableState],
   echarts4r[echarts4rOutput, renderEcharts4r],
+  shinyBS[bsCollapse, bsCollapsePanel],
 )
 box::use(
   app/logic/mtg
@@ -35,13 +36,19 @@ ui <- function(id) {
             )
         ),
         div(class="row",
-            div(class="col-10",
-                reactableOutput(ns("table"))
-            ),
-            div(class="col-2 offset-10",
+            div(class="col-12",
+                bsCollapse(id="details",
+                  bsCollapsePanel("More Details",
+                                  reactableOutput(ns("table")),
+                                  style="info")
+                )
+            )
+        ),
+        div(class="row",
+            div(class="col-4 offset-8 text-right",
                 actionButton(
                   inputId=ns("go_to_types"),
-                  label="Your Cards by Type",
+                  label="Continue to Cards by Type",
                   class="btn-primary btn-lg"
                 )
             )
