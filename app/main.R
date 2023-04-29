@@ -3,7 +3,7 @@ box::use(
   shiny.router[router_ui, router_server, route, route_link]
 )
 box::use(
-  app/view[table, chart],
+  app/view[table, chart, intro],
   app/logic/rhinos
 )
 
@@ -20,6 +20,9 @@ ui <- function(id) {
       tags$ul(
         class="nav navbar-nav",
         tags$li(
+          a("Home", href=route_link("/"))
+        ),
+        tags$li(
           a("Table", href=route_link("table"))
         ),
         tags$li(
@@ -28,6 +31,7 @@ ui <- function(id) {
       )
     ),
     router_ui(
+      route("/", intro$ui(ns("intro"))),
       route("table", table$ui(ns("table"))),
       route("chart", chart$ui(ns("chart")))
     )
@@ -44,9 +48,11 @@ ui <- function(id) {
 #' @export
 server <- function(id) {
   moduleServer(id, function(input, output, session) {
-    router_server("table")
+    router_server("/")
 
     data <- reactive(rhinos$fetch_data())
+
+    intro$server("intro")
     chart$server("chart", data)
     table$server("table", data)
   })
