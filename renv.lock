@@ -1023,6 +1023,19 @@
       ],
       "Hash": "c2eae3d8c670fa9dfa35a12066f4a1d5"
     },
+    "shiny.router": {
+      "Package": "shiny.router",
+      "Version": "0.3.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "glue",
+        "htmltools",
+        "rlang",
+        "shiny"
+      ],
+      "Hash": "704f0167ce6857051a48547e31d38060"
+    },
     "sourcetools": {
       "Package": "sourcetools",
       "Version": "0.1.7-1",
