@@ -1,8 +1,8 @@
 # app/view/cards_by_set.R
 
 box::use(
-  shiny[actionButton, column, div, fluidRow,
-        h2, moduleServer, NS, observeEvent, reactive],
+  shiny[actionButton, column, div, bootstrapPage,
+        h2, moduleServer, NS, observeEvent, reactive, selectInput],
   shiny.router[change_page],
   reactable[reactableOutput, renderReactable, getReactableState],
 )
@@ -14,22 +14,34 @@ box::use(
 ui <- function(id) {
   ns <- NS(id)
 
-  fluidRow(
-    column(
-      width=6,
-      div(
-        class="jumbotron",
-        actionButton(
-          inputId=ns("go_to_types"),
-          label="Your Cards by Type",
-          class="btn-primary btn-lg"
+  bootstrapPage(
+    div(class="container",
+        div(class="row",
+            div(class="col-3",
+                selectInput("ordering", "Order By", c("Release Date", "Percent Complete"))
+            ),
+            div(class="col-3",
+                selectInput("showing", "Show", c("Card Count", "Dollars"))
+            ),
+            div(class="col",
+                mtg$set_picker_input()
+            )
+        ),
+        div(class="row",
+            div(class="col-10",
+                reactableOutput(ns("table"))
+            ),
+            div(class="col-2",
+                actionButton(
+                  inputId=ns("go_to_types"),
+                  label="Your Cards by Type",
+                  class="btn-primary btn-lg"
+                )
+            )
+        ),
+        div(class="row",
+
         )
-      ),
-      mtg$set_picker_input()
-    ),
-    column(
-      width=6,
-      reactableOutput(ns("table"))
     )
   )
 }
