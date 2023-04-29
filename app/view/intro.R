@@ -7,6 +7,7 @@ box::use(
 #' @export
 ui <- function(id) {
   ns <- NS(id)
+
   fluidRow(
     column(
       width=6,

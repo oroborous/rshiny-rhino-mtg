@@ -3,8 +3,11 @@
 
 #' @export
 box::use(
-  app/view/chart,
-  app/view/table,
-  app/view/intro,
+  app/view/collection,
+  app/view/cards_by_set,
+  app/view/cards_by_type,
+  app/view/price_history,
+  app/view/trades,
+  app/view/list,
   app/view/page_404
 )

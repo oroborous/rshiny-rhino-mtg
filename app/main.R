@@ -5,7 +5,7 @@ box::use(
                route, route_link]
 )
 box::use(
-  app/view[table, chart, intro, page_404],
+  app/view[collection, cards_by_set, cards_by_type, price_history, trades, list, page_404],
   app/logic/rhinos
 )
 
@@ -17,6 +17,7 @@ ui <- function(id) {
   ns <- NS(id)
 
   bootstrapPage(
+    tags$h1("Magic: The Gathering Set Collector"),
     tags$nav(
       class="navbar",
       tags$ul(
@@ -25,17 +26,29 @@ ui <- function(id) {
           a("Home", href=route_link("/"))
         ),
         tags$li(
-          a("Table", href=route_link("table"))
+          a("Your Sets", href=route_link("sets"))
         ),
         tags$li(
-          a("Chart", href=route_link("chart"))
+          a("Card Types", href=route_link("types"))
+        ),
+        tags$li(
+          a("Price History", href=route_link("prices"))
+        ),
+        tags$li(
+          a("Your Trades", href=route_link("trades"))
+        ),
+        tags$li(
+          a("Trade List", href=route_link("list"))
         )
       )
     ),
     router_ui(
-      route("/", intro$ui(ns("intro"))),
-      route("table", table$ui(ns("table"))),
-      route("chart", chart$ui(ns("chart"))),
+      route("/", collection$ui(ns("collection"))),
+      route("sets", cards_by_set$ui(ns("sets"))),
+      route("types", cards_by_type$ui(ns("types"))),
+      route("prices", price_history$ui(ns("prices"))),
+      route("trades", trades$ui(ns("trades"))),
+      route("list", list$ui(ns("list"))),
       page_404 = page_404$ui(ns("page_404"))
     )
   )
@@ -48,8 +61,11 @@ server <- function(id) {
 
     data <- reactive(rhinos$fetch_data())
 
-    intro$server("intro")
-    chart$server("chart", data)
-    table$server("table", data)
+    collection$server("collection")
+    cards_by_set$server("sets", data)
+    cards_by_type$server("types", data)
+    price_history$server("prices", data)
+    list$server("list", data)
+    trades$server("trades", data)
   })
 }
