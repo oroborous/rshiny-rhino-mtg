@@ -30,10 +30,8 @@ ui <- function(id, setPicker) {
             ),
             div(class="col",
               mtg$set_picker_input(ns("set"))
-            ),
-            div(class="col",
-                verbatimTextOutput(ns("temp"))
             )
+            #,div(class="col", verbatimTextOutput(ns("temp")))
         ),
         div(class="row",
             div(class="col-12",
@@ -76,7 +74,7 @@ server <- function (id, data, selectedSets) {
     })
 
     observeEvent(input$set, ignoreInit = FALSE, {
-      output$temp <- renderPrint(input$set)
+     # output$temp <- renderPrint(input$set)
       selectedSets(input$set)
     })
 
