@@ -8,6 +8,7 @@ box::use(
   echarts4r,
   htmlwidgets[JS],
   shinyWidgets[pickerInput],
+  shiny[reactiveVal],
 )
 
 con <- DBI::dbConnect(RPostgres::Postgres(),
@@ -18,6 +19,13 @@ con <- DBI::dbConnect(RPostgres::Postgres(),
                       port=5432)
 
 df_sets <- DBI::dbGetQuery(con, "select code, name, releasedate, totalsetsize from mtg_sets order by releasedate, name")
+
+useremail <- reactiveVal("stacy@email.com")
+
+#' @export
+fetch_useremail <- function() {
+  useremail
+}
 
 #' @export
 fetch_set_data <- function() {

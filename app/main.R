@@ -3,20 +3,15 @@ box::use(shiny[bootstrapPage, moduleServer, NS, reactive,
          shiny.router[router_ui, router_server,
                       route, route_link],
          bslib[bs_theme])
-box::use(app / view[collection, cards_by_set, cards_by_type, price_history, trades, list, page_404],
-         app / logic / mtg)
-
-grid <- function(...)
-  div(class = "grid", ...)
-card <- function(...)
-  div(class = "card", ...)
+box::use(app/view[collection, cards_by_set, cards_by_type, price_history, trades, list, page_404],
+         app/logic/mtg)
 
 #' @export
 ui <- function(id) {
   ns <- NS(id)
 
   bootstrapPage(
-    #theme = bs_theme(version = 4),
+    theme = bs_theme(version = 4),
     div(class = "container mt-5",
     div(class = "row",
       div(class = "col",
@@ -57,7 +52,7 @@ server <- function(id) {
 
     data <- reactive(mtg$fetch_set_data())
 
-    collection$server("collection")
+    collection$server("collection", mtg$fetch_useremail())
     cards_by_set$server("sets", data)
     cards_by_type$server("types", data)
     price_history$server("prices", data)
