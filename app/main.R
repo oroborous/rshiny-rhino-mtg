@@ -1,16 +1,14 @@
 box::use(shiny[bootstrapPage, moduleServer, NS, reactive,
-               titlePanel, div, tags, a],
+               titlePanel, div, tags, a, reactiveVal],
          shiny.router[router_ui, router_server,
                       route, route_link],
          bslib[bs_theme])
-box::use(app/view[collection, cards_by_set, cards_by_type, price_history, trades, list, set_picker, page_404],
+box::use(app/view[collection, cards_by_set, cards_by_type, price_history, trades, list, page_404],
          app/logic/mtg)
 
 #' @export
 ui <- function(id) {
   ns <- NS(id)
-
-  setPicker <- set_picker$ui(ns("setPicker"))
 
   bootstrapPage(
     theme = bs_theme(version = 4),
@@ -34,7 +32,7 @@ ui <- function(id) {
         div(class = "col",
             router_ui(
               route("/", collection$ui(ns("collection"))),
-              route("sets", cards_by_set$ui(ns("sets"), setPicker)),
+              route("sets", cards_by_set$ui(ns("sets"))),
               route("types", cards_by_type$ui(ns("types"))),
               route("prices", price_history$ui(ns("prices"))),
               route("trades", trades$ui(ns("trades"))),
@@ -54,10 +52,11 @@ server <- function(id) {
 
     data <- reactive(mtg$fetch_set_data())
 
-    selectedSets <- set_picker$server("setPicker")
+    selectedSets <- reactiveVal(c(mtg$fetch_set_data()$name))
+
     collection$server("collection", mtg$fetch_useremail())
     cards_by_set$server("sets", data, selectedSets)
-    cards_by_type$server("types", data)
+    cards_by_type$server("types", data, selectedSets)
     price_history$server("prices", data)
     list$server("list", data)
     trades$server("trades", data)

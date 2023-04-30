@@ -3,7 +3,7 @@
 box::use(
   dplyr[filter],
   shiny[actionButton, column, div, bootstrapPage,
-        verbatimTextOutput, renderPrint,
+        verbatimTextOutput, renderPrint, observe,
         h2, moduleServer, NS, observeEvent, reactive, selectInput],
   shiny.router[change_page],
   shinyWidgets[pickerInput, updatePickerInput],
@@ -12,8 +12,7 @@ box::use(
   shinyBS[bsCollapse, bsCollapsePanel],
 )
 box::use(
-  app/view/set_picker,
-  app/logic/mtg
+  app/logic/mtg,
 )
 
 #' @export
@@ -30,7 +29,7 @@ ui <- function(id, setPicker) {
                 selectInput(ns("showing"), "Show", c("Card Count", "Dollars"))
             ),
             div(class="col",
-              setPicker
+              mtg$set_picker_input(ns("set"))
             ),
             div(class="col",
                 verbatimTextOutput(ns("temp"))
@@ -68,11 +67,17 @@ server <- function (id, data, selectedSets) {
 
   moduleServer(id, function(input, output, session) {
 
-
     df <- reactive(data() |> filter(name %in% selectedSets()))
 
-    observeEvent(selectedSets, ignoreInit = FALSE, {
-      output$temp <- renderPrint(selectedSets())
+    observe({
+      updatePickerInput(session=session,
+                        inputId="set",
+                        selected=selectedSets())
+    })
+
+    observeEvent(input$set, ignoreInit = FALSE, {
+      output$temp <- renderPrint(input$set)
+      selectedSets(input$set)
     })
 
     output$chart <- renderEcharts4r(

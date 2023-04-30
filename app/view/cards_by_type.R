@@ -2,20 +2,21 @@
 
 box::use(
   dplyr[filter],
-  shiny[actionButton, column, div, bootstrapPage,
-        h2, moduleServer, NS, observeEvent, reactive, selectInput],
+  shiny[actionButton, column, div, bootstrapPage, renderPrint, verbatimTextOutput,
+        observe,
+        h2, moduleServer, NS, observeEvent, reactive, selectInput, is.reactive],
   shiny.router[change_page],
+  shinyWidgets[pickerInput, updatePickerInput],
   reactable[reactableOutput, renderReactable, getReactableState],
   echarts4r[echarts4rOutput, renderEcharts4r],
   shinyBS[bsCollapse, bsCollapsePanel],
 )
 box::use(
   app/logic/mtg,
-  app/view/set_picker
 )
 
 #' @export
-ui <- function(id) {
+ui <- function(id, setPicker) {
   ns <- NS(id)
 
   bootstrapPage(
@@ -28,8 +29,10 @@ ui <- function(id) {
                 selectInput(ns("showing"), "Show", c("Card Count", "Dollars"))
             ),
             div(class="col",
-                #mtg$set_picker_input(ns("set"))
-                set_picker$ui(ns("set"))
+                mtg$set_picker_input(ns("set"))
+            ),
+            div(class="col",
+                verbatimTextOutput(ns("temp"))
             )
         ),
         div(class="row",
@@ -61,16 +64,31 @@ ui <- function(id) {
 }
 
 #' @export
-server <- function (id, data) {
+server <- function (id, data, selectedSets) {
+  stopifnot(is.reactive(selectedSets))
+  stopifnot(is.reactive(data))
+
   moduleServer(id, function(input, output, session) {
-    df <- reactive(data() |> filter(name %in% input$set))
+
+    df <- reactive(data() |> filter(name %in% selectedSets()))
+
+    observe({
+      updatePickerInput(session=session,
+                        inputId="set",
+                        selected=selectedSets())
+    })
+
+    observeEvent(input$set, ignoreInit = FALSE, {
+      output$temp <- renderPrint(input$set)
+      selectedSets(input$set)
+    })
 
     output$chart <- renderEcharts4r(
       mtg$chart(df())
     )
 
     output$table <- renderReactable(
-      mtg$table(data())
+      mtg$table(df())
     )
 
     observeEvent(input$go_to_prices, {

@@ -9,6 +9,5 @@ box::use(
   app/view/price_history,
   app/view/trades,
   app/view/list,
-  app/view/set_picker,
   app/view/page_404
 )
