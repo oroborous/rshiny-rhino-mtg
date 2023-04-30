@@ -10,7 +10,8 @@ box::use(
   shinyBS[bsCollapse, bsCollapsePanel],
 )
 box::use(
-  app/logic/mtg
+  app/logic/mtg,
+  app/view/set_picker
 )
 
 #' @export
@@ -27,7 +28,8 @@ ui <- function(id) {
                 selectInput(ns("showing"), "Show", c("Card Count", "Dollars"))
             ),
             div(class="col",
-                mtg$set_picker_input(ns("set"))
+                #mtg$set_picker_input(ns("set"))
+                set_picker$ui(ns("set"))
             )
         ),
         div(class="row",

@@ -8,7 +8,7 @@ box::use(
   echarts4r,
   htmlwidgets[JS],
   shinyWidgets[pickerInput],
-  shiny[reactiveVal],
+  shiny[reactiveVal, reactive],
 )
 
 con <- DBI::dbConnect(RPostgres::Postgres(),
@@ -33,6 +33,13 @@ fetch_set_data <- function() {
 }
 
 #' @export
+set_picker_input <- function(id) {
+  pickerInput(id, "Card Set(s)", c(df_sets$name),
+              options=list('actions-box'=TRUE),
+              multiple=TRUE)
+}
+
+#' @export
 table <- function(data) {
   data |>
     reactable()
@@ -45,11 +52,4 @@ chart <- function(data) {
     echarts4r$e_bar(totalsetsize) |>
    # echarts4r$e_x_axis(Year, formatter = JS("App.formatYear")) |>
     echarts4r$e_tooltip()
-}
-
-#' @export
-set_picker_input <- function(id) {
-  pickerInput(id, "Card Set(s)", c(df_sets$name),
-              options=list('actions-box'=TRUE),
-              multiple=TRUE)
 }

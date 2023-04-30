@@ -6,17 +6,18 @@ box::use(
         verbatimTextOutput, renderPrint,
         h2, moduleServer, NS, observeEvent, reactive, selectInput],
   shiny.router[change_page],
-  shinyWidgets[pickerInput],
+  shinyWidgets[pickerInput, updatePickerInput],
   reactable[reactableOutput, renderReactable, getReactableState],
   echarts4r[echarts4rOutput, renderEcharts4r],
   shinyBS[bsCollapse, bsCollapsePanel],
 )
 box::use(
+  app/view/set_picker,
   app/logic/mtg
 )
 
 #' @export
-ui <- function(id) {
+ui <- function(id, setPicker) {
   ns <- NS(id)
 
   bootstrapPage(
@@ -29,7 +30,7 @@ ui <- function(id) {
                 selectInput(ns("showing"), "Show", c("Card Count", "Dollars"))
             ),
             div(class="col",
-                mtg$set_picker_input(ns("set"))
+              setPicker
             ),
             div(class="col",
                 verbatimTextOutput(ns("temp"))
@@ -63,13 +64,15 @@ ui <- function(id) {
 }
 
 #' @export
-server <- function (id, data) {
+server <- function (id, data, selectedSets) {
 
   moduleServer(id, function(input, output, session) {
-    df <- reactive(data() |> filter(name %in% input$set))
 
-    observeEvent(input$ordering, ignoreInit = FALSE, {
-      output$temp <- renderPrint(input$set)
+
+    df <- reactive(data() |> filter(name %in% selectedSets()))
+
+    observeEvent(selectedSets, ignoreInit = FALSE, {
+      output$temp <- renderPrint(selectedSets())
     })
 
     output$chart <- renderEcharts4r(
