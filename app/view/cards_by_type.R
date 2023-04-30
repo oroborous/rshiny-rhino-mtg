@@ -21,10 +21,10 @@ ui <- function(id) {
     div(class="container",
         div(class="row",
             div(class="col-3",
-                selectInput("ordering", "Order By", c("Cards in Set", "Percent Complete"))
+                selectInput(ns("ordering"), "Order By", c("Cards in Set", "Percent Complete"))
             ),
             div(class="col-3",
-                selectInput("showing", "Show", c("Card Count", "Dollars"))
+                selectInput(ns("showing"), "Show", c("Card Count", "Dollars"))
             ),
             div(class="col",
                 mtg$set_picker_input(ns("set"))
