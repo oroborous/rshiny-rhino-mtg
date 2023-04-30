@@ -40,8 +40,8 @@ chart <- function(data) {
 }
 
 #' @export
-set_picker_input <- function() {
-  pickerInput("set", "Card Set(s)", c(df_sets$name),
+set_picker_input <- function(id) {
+  pickerInput(id, "Card Set(s)", c(df_sets$name),
               options=list('actions-box'=TRUE),
               multiple=TRUE)
 }

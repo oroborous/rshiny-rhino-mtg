@@ -1,6 +1,7 @@
 # app/view/cards_by_type.R
 
 box::use(
+  dplyr[filter],
   shiny[actionButton, column, div, bootstrapPage,
         h2, moduleServer, NS, observeEvent, reactive, selectInput],
   shiny.router[change_page],
@@ -26,7 +27,7 @@ ui <- function(id) {
                 selectInput("showing", "Show", c("Card Count", "Dollars"))
             ),
             div(class="col",
-                mtg$set_picker_input()
+                mtg$set_picker_input(ns("set"))
             )
         ),
         div(class="row",
@@ -60,12 +61,14 @@ ui <- function(id) {
 #' @export
 server <- function (id, data) {
   moduleServer(id, function(input, output, session) {
-    output$table <- renderReactable(
-      mtg$table(data())
-    )
+    df <- reactive(data() |> filter(name %in% input$set))
 
     output$chart <- renderEcharts4r(
-      mtg$chart(data())
+      mtg$chart(df())
+    )
+
+    output$table <- renderReactable(
+      mtg$table(data())
     )
 
     observeEvent(input$go_to_prices, {

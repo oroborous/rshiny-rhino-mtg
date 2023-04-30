@@ -29,7 +29,7 @@ ui <- function(id) {
                 selectInput("showing_owned", "Price type for your set cards", c("Purchase Price", "Selling Price"))
             ),
             div(class="col",
-                mtg$set_picker_input()
+                mtg$set_picker_input(ns("set"))
             )
         ),
         div(class="row",

@@ -23,7 +23,7 @@ ui <- function(id) {
                             c("Show All", "4 copies owned", "8 copies owned"))
             ),
             div(class="col",
-                mtg$set_picker_input()
+                mtg$set_picker_input(ns("set"))
             )
         ),
         div(class="row",

@@ -1,9 +1,12 @@
 # app/view/cards_by_set.R
 
 box::use(
+  dplyr[filter],
   shiny[actionButton, column, div, bootstrapPage,
+        verbatimTextOutput, renderPrint,
         h2, moduleServer, NS, observeEvent, reactive, selectInput],
   shiny.router[change_page],
+  shinyWidgets[pickerInput],
   reactable[reactableOutput, renderReactable, getReactableState],
   echarts4r[echarts4rOutput, renderEcharts4r],
   shinyBS[bsCollapse, bsCollapsePanel],
@@ -20,20 +23,22 @@ ui <- function(id) {
     div(class="container",
         div(class="row",
             div(class="col-3",
-                selectInput("ordering", "Order By", c("Release Date", "Percent Complete"))
+                selectInput(ns("ordering"), "Order By", c("Release Date", "Percent Complete"))
             ),
             div(class="col-3",
-                selectInput("showing", "Show", c("Card Count", "Dollars"))
+                selectInput(ns("showing"), "Show", c("Card Count", "Dollars"))
             ),
             div(class="col",
-                mtg$set_picker_input()
+                mtg$set_picker_input(ns("set"))
+            ),
+            div(class="col",
+                verbatimTextOutput(ns("temp"))
             )
         ),
         div(class="row",
             div(class="col-12",
                 echarts4rOutput(ns("chart"))
-
-            )
+            ),
         ),
         div(class="row",
             div(class="col-12",
@@ -59,17 +64,25 @@ ui <- function(id) {
 
 #' @export
 server <- function (id, data) {
+
   moduleServer(id, function(input, output, session) {
-    output$table <- renderReactable(
-      mtg$table(data())
-    )
+    df <- reactive(data() |> filter(name %in% input$set))
+
+    observeEvent(input$ordering, ignoreInit = FALSE, {
+      output$temp <- renderPrint(input$set)
+    })
 
     output$chart <- renderEcharts4r(
-      mtg$chart(data())
+      mtg$chart(df())
+    )
+
+    output$table <- renderReactable(
+      mtg$table(df())
     )
 
     observeEvent(input$go_to_types, {
       change_page("types")
     })
   })
+
 }

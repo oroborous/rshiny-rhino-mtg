@@ -16,7 +16,7 @@ ui <- function(id) {
   ns <- NS(id)
 
   bootstrapPage(
-    theme = bs_theme(version = 4),
+    #theme = bs_theme(version = 4),
     div(class = "container mt-5",
     div(class = "row",
       div(class = "col",
