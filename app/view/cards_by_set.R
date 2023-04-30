@@ -6,7 +6,7 @@ box::use(
         verbatimTextOutput, renderPrint, observe,
         h2, moduleServer, NS, observeEvent, reactive, selectInput],
   shiny.router[change_page],
-  shinyWidgets[pickerInput, updatePickerInput],
+  shinyWidgets[updatePickerInput],
   reactable[reactableOutput, renderReactable, getReactableState],
   echarts4r[echarts4rOutput, renderEcharts4r],
   shinyBS[bsCollapse, bsCollapsePanel],
@@ -81,7 +81,7 @@ server <- function (id, data, selectedSets) {
     })
 
     output$chart <- renderEcharts4r(
-      mtg$chart(df())
+      mtg$cards_by_set_chart(df())
     )
 
     output$table <- renderReactable(

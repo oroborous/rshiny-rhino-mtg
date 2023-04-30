@@ -1,9 +1,11 @@
 # app/view/price_history.R
 
 box::use(
-  shiny[actionButton, column, div, bootstrapPage,
+  dplyr[filter],
+  shiny[actionButton, column, div, bootstrapPage, observe,
         h2, moduleServer, NS, observeEvent, reactive, selectInput],
   shiny.router[change_page],
+  shinyWidgets[updatePickerInput],
   reactable[reactableOutput, renderReactable, getReactableState],
   echarts4r[echarts4rOutput, renderEcharts4r],
   shinyBS[bsCollapse, bsCollapsePanel],
@@ -61,14 +63,27 @@ ui <- function(id) {
 }
 
 #' @export
-server <- function (id, data) {
+server <- function (id, data, selectedSets) {
+
   moduleServer(id, function(input, output, session) {
-    output$table <- renderReactable(
-      mtg$table(data())
-    )
+    df <- reactive(data() |> filter(name %in% selectedSets()))
+
+    observe({
+      updatePickerInput(session=session,
+                        inputId="set",
+                        selected=selectedSets())
+    })
+
+    observeEvent(input$set, ignoreInit = FALSE, {
+      selectedSets(input$set)
+    })
 
     output$chart <- renderEcharts4r(
-      mtg$chart(data())
+      mtg$chart(df())
+    )
+
+    output$table <- renderReactable(
+      mtg$table(df())
     )
 
     observeEvent(input$go_to_trades, {

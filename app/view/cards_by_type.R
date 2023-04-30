@@ -6,7 +6,7 @@ box::use(
         observe,
         h2, moduleServer, NS, observeEvent, reactive, selectInput, is.reactive],
   shiny.router[change_page],
-  shinyWidgets[pickerInput, updatePickerInput],
+  shinyWidgets[updatePickerInput],
   reactable[reactableOutput, renderReactable, getReactableState],
   echarts4r[echarts4rOutput, renderEcharts4r],
   shinyBS[bsCollapse, bsCollapsePanel],

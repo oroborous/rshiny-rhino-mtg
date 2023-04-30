@@ -51,14 +51,15 @@ server <- function(id) {
     router_server("/")
 
     data <- reactive(mtg$fetch_set_data())
+    user_data <- mtg$fetch_user_set_data()
 
     selectedSets <- reactiveVal(c(mtg$fetch_set_data()$name))
 
     collection$server("collection", mtg$fetch_useremail())
-    cards_by_set$server("sets", data, selectedSets)
+    cards_by_set$server("sets", user_data, selectedSets)
     cards_by_type$server("types", data, selectedSets)
-    price_history$server("prices", data)
+    price_history$server("prices", data, selectedSets)
+    trades$server("trades", data, selectedSets)
     list$server("list", data)
-    trades$server("trades", data)
   })
 }
