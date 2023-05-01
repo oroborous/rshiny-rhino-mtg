@@ -33,14 +33,30 @@ fetch_useremail <- function() {
   useremail
 }
 
+
+
+#' @export
+fetch_selected_sets <- function() {
+  selectedSets
+}
+
 df_user_sets <- reactiveVal()
+selectedSets <- reactiveVal()
 
 observeEvent(useremail, {
-  user_sets_query <- "select d.name, count(b.uuid) as owned from mtg_collections b join mtg_cards c on (b.uuid = c.uuid) join mtg_sets d on (c.setcode = d.code) where b.useremail = $1 group by d.name"
+  user_sets_query <- paste0("select d.name, d.releasedate, count(b.uuid) as owned,",
+    "cast(count(b.uuid) as decimal(7,2)) / d.totalsetsize as percentowned ",
+    "from mtg_collections b ",
+    "join mtg_cards c on (b.uuid = c.uuid) ",
+    "join mtg_sets d on (c.setcode = d.code) ",
+    "where b.useremail = $1 ",
+    "group by d.name, d.releasedate, d.totalsetsize")
   user_sets_result <- DBI::dbSendQuery(con, user_sets_query)
 
   DBI::dbBind(user_sets_result, list(useremail()))
   df_user_sets(DBI::dbFetch(user_sets_result))
+
+  selectedSets(c(df_user_sets()$name))
 })
 
 #' @export

@@ -52,8 +52,7 @@ server <- function(id) {
 
     data <- reactive(mtg$fetch_set_data())
     user_data <- mtg$fetch_user_set_data()
-
-    selectedSets <- reactiveVal(c(mtg$fetch_set_data()$name))
+    selectedSets <- mtg$fetch_selected_sets()
 
     collection$server("collection", mtg$fetch_useremail())
     cards_by_set$server("sets", user_data, selectedSets)

@@ -23,7 +23,8 @@ ui <- function(id, setPicker) {
     div(class="container",
         div(class="row",
             div(class="col-3",
-                selectInput(ns("ordering"), "Order By", c("Release Date", "Percent Complete"))
+                selectInput(ns("ordering"), "Order By", c("Release Date" = "releasedate",
+                                                          "Percent Complete" = "percentowned"))
             ),
             div(class="col-3",
                 selectInput(ns("showing"), "Show", c("Card Count", "Dollars"))
