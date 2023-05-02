@@ -71,16 +71,18 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
     df <- reactive(mtg$fetch_cards_by_set(useremailR()) |>
                      filter(setname %in% selectedSetsR()) |>
                      group_by(grouptype) |>
-                     arrange(input$ordering))
+                     arrange(desc(percentowned)))
 
     # update set choices when a new user's data is loaded
     observeEvent(useremailR(), {
-      output$temp <- renderPrint(length(userSetsR()))
+      output$temp <- renderPrint(nrow(df()))
       updatePickerInput(session=session,
                         inputId="set",
                         choices=userSetsR(),
                         selected=selectedSetsR())
     })
+
+    # apply the ordering dropdown to the data
 
     # only update set selections when the picker input window closes
     observeEvent(
@@ -97,7 +99,7 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
     output$chart <- echarts4r$renderEcharts4r(
       if (display() == "numcards")
          df() |>
-           echarts4r$e_chart(setcode) |>
+           echarts4r$e_chart(setcode, reorder=FALSE) |>
            echarts4r$e_bar(numcards) |>
           # echarts4r$e_x_axis(Year, formatter = JS("App.formatYear")) |>
            echarts4r$e_tooltip()
