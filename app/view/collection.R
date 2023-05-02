@@ -22,7 +22,7 @@ ui <- function(id) {
         ),
       div(class="col card mt-3 p-3",
           h2("View your saved collection"),
-          textInput(ns("useremail"), "Enter your email to view your saved collection", placeholder="stacy@email.com"),
+          textInput(ns("useremail"), "Enter your email to view your saved collection", value="stacy@email.com"),
           actionButton(
             inputId=ns("go_to_sets"),
             label="View My Collection",

@@ -64,38 +64,35 @@ ui <- function(id, setPicker) {
 }
 
 #' @export
-server <- function (id, userSetsR, selectedSetsR) {
+server <- function (id, userSetsR, selectedSetsR, useremailR) {
 
   moduleServer(id, function(input, output, session) {
 
-    df <- reactive(mtg$fetch_cards_by_set()() |>
+    df <- reactive(mtg$fetch_cards_by_set(useremailR()) |>
                      filter(setname %in% selectedSetsR()) |>
-                     arrange(input$ordering) |>
-                     group_by(grouptype))
+                     group_by(grouptype) |>
+                     arrange(input$ordering))
 
-    observe({
+    # update set choices when a new user's data is loaded
+    observeEvent(useremailR(), {
+      output$temp <- renderPrint(length(userSetsR()))
       updatePickerInput(session=session,
                         inputId="set",
                         choices=userSetsR(),
                         selected=selectedSetsR())
     })
 
+    # only update set selections when the picker input window closes
     observeEvent(
       input$set_open,
       {
         if (!isTRUE(input$set_open)) {
-          #output$temp <- renderPrint(selectedSetsR())
           selectedSetsR(input$set)
         }
       }
     )
 
-    observeEvent(input$showing, {
-      output$temp <- renderPrint(display())
-    })
-
     display <- reactive(input$showing)
-
 
     output$chart <- echarts4r$renderEcharts4r(
       if (display() == "numcards")

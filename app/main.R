@@ -1,4 +1,4 @@
-box::use(shiny[bootstrapPage, moduleServer, NS, reactive,
+box::use(shiny[bootstrapPage, moduleServer, NS, observe,
                titlePanel, div, tags, a, reactiveVal],
          shiny.router[router_ui, router_server,
                       route, route_link],
@@ -50,12 +50,18 @@ server <- function(id) {
   moduleServer(id, function(input, output, session) {
     router_server("/")
 
-    data <- reactive(mtg$fetch_set_data())
-    userSetsR <- mtg$fetch_user_sets()
-    selectedSetsR <- mtg$fetch_selected_sets()
+    useremailR <- reactiveVal("stacy@email.com")
+    userSetsR <- reactiveVal()
+    selectedSetsR <- reactiveVal()
 
-    collection$server("collection", mtg$fetch_useremail())
-    cards_by_set$server("sets", userSetsR, selectedSetsR)
+    # load initial set data for sample user 'stacy@email.com'
+    observe({
+      userSetsR(c(mtg$fetch_user_sets(useremailR())$setname))
+      selectedSetsR(userSetsR())
+    })
+
+    collection$server("collection", useremailR)
+    cards_by_set$server("sets", userSetsR, selectedSetsR, useremailR)
     cards_by_type$server("types", userSetsR, selectedSetsR)
     price_history$server("prices", userSetsR, selectedSetsR)
     trades$server("trades", userSetsR, selectedSetsR)
