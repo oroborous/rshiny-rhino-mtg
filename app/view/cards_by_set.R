@@ -1,14 +1,14 @@
 # app/view/cards_by_set.R
 
 box::use(
-  dplyr[filter],
+  dplyr[filter, group_by, arrange, select],
   shiny[actionButton, column, div, bootstrapPage,
         verbatimTextOutput, renderPrint, observe,
         h2, moduleServer, NS, observeEvent, reactive, selectInput],
   shiny.router[change_page],
   shinyWidgets[updatePickerInput],
   reactable[reactable, reactableOutput, renderReactable, getReactableState],
-  echarts4r[echarts4rOutput, renderEcharts4r],
+  echarts4r,
   shinyBS[bsCollapse, bsCollapsePanel],
 )
 box::use(
@@ -23,20 +23,22 @@ ui <- function(id, setPicker) {
     div(class="container",
         div(class="row",
             div(class="col-3",
-                selectInput(ns("ordering"), "Order By", c("Release Date" = "releasedate",
-                                                          "Percent Complete" = "percentowned"))
+                selectInput(ns("ordering"), "Order By", c("Set Release Date" = "releasedate",
+                                                          "Percent of Set Complete" = "percentowned"))
             ),
             div(class="col-3",
-                selectInput(ns("showing"), "Show", c("Card Count", "Dollars"))
+                selectInput(ns("showing"), "Show", c("Number of Cards" = "numcards",
+                                                     "Dollar Value of Cards" = "avgretailprice"))
             ),
             div(class="col",
               mtg$set_picker_input(ns("set"))
             )
-            ,div(class="col", verbatimTextOutput(ns("temp")))
+
         ),
+        div(class="row", div(class="col", verbatimTextOutput(ns("temp")))),
         div(class="row",
             div(class="col-12",
-                echarts4rOutput(ns("chart"))
+                echarts4r$echarts4rOutput(ns("chart"))
             ),
         ),
         div(class="row",
@@ -66,7 +68,10 @@ server <- function (id, userSetsR, selectedSetsR) {
 
   moduleServer(id, function(input, output, session) {
 
-    df <- reactive(mtg$fetch_cards_by_set()() |> filter(setname %in% selectedSetsR()))
+    df <- reactive(mtg$fetch_cards_by_set()() |>
+                     filter(setname %in% selectedSetsR()) |>
+                     arrange(input$ordering) |>
+                     group_by(grouptype))
 
     observe({
       updatePickerInput(session=session,
@@ -79,19 +84,33 @@ server <- function (id, userSetsR, selectedSetsR) {
       input$set_open,
       {
         if (!isTRUE(input$set_open)) {
-          output$temp <- renderPrint(selectedSetsR())
+          #output$temp <- renderPrint(selectedSetsR())
           selectedSetsR(input$set)
         }
       }
     )
 
-    # output$chart <- renderEcharts4r(
-    #   data |>
-    #     echarts4r$e_chart(code) |>
-    #     echarts4r$e_bar(totalsetsize) |>
-    #     # echarts4r$e_x_axis(Year, formatter = JS("App.formatYear")) |>
-    #     echarts4r$e_tooltip()
-    # )
+    observeEvent(input$showing, {
+      output$temp <- renderPrint(display())
+    })
+
+    display <- reactive(input$showing)
+
+
+    output$chart <- echarts4r$renderEcharts4r(
+      if (display() == "numcards")
+         df() |>
+           echarts4r$e_chart(setcode) |>
+           echarts4r$e_bar(numcards) |>
+          # echarts4r$e_x_axis(Year, formatter = JS("App.formatYear")) |>
+           echarts4r$e_tooltip()
+       else
+         df() |>
+          echarts4r$e_chart(setcode) |>
+          echarts4r$e_bar(avgretailprice) |>
+          # echarts4r$e_x_axis(Year, formatter = JS("App.formatYear")) |>
+          echarts4r$e_tooltip()
+    )
 
     output$table <- renderReactable(
       df() |>

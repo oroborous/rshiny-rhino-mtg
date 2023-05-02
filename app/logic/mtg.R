@@ -2,9 +2,6 @@
 
 box::use(
   DBI[dbConnect, dbSendQuery, dbBind, dbFetch, dbClearResult],
-  dplyr,
-  tidyr,
-  echarts4r,
   htmlwidgets[JS],
   shinyWidgets[pickerInput],
   shiny[reactiveVal, reactive, observeEvent],
