@@ -32,7 +32,7 @@ ui <- function(id, setPicker) {
             div(class="col",
               mtg$set_picker_input(ns("set"))
             )
-            #,div(class="col", verbatimTextOutput(ns("temp")))
+            ,div(class="col", verbatimTextOutput(ns("temp")))
         ),
         div(class="row",
             div(class="col-12",
@@ -62,30 +62,41 @@ ui <- function(id, setPicker) {
 }
 
 #' @export
-server <- function (id, data, selectedSets) {
+server <- function (id, userSetsR, selectedSetsR) {
 
   moduleServer(id, function(input, output, session) {
 
-    df <- reactive(data() |> filter(name %in% selectedSets()))
+    #df <- reactive(data() |> filter(setname %in% dfSelectedSetsR()))
 
     observe({
       updatePickerInput(session=session,
                         inputId="set",
-                        selected=selectedSets())
+                        choices=userSetsR(),
+                        selected=selectedSetsR())
     })
 
-    observeEvent(input$set, ignoreInit = FALSE, {
-     # output$temp <- renderPrint(input$set)
-      selectedSets(input$set)
-    })
-
-    output$chart <- renderEcharts4r(
-      mtg$cards_by_set_chart(df())
+    observeEvent(
+      input$set_open,
+      {
+        if (!isTRUE(input$set_open)) {
+          output$temp <- renderPrint(selectedSetsR())
+          selectedSetsR(input$set)
+        }
+      }
     )
 
-    output$table <- renderReactable(
-      mtg$table(df())
-    )
+    # output$chart <- renderEcharts4r(
+    #   data |>
+    #     echarts4r$e_chart(code) |>
+    #     echarts4r$e_bar(totalsetsize) |>
+    #     # echarts4r$e_x_axis(Year, formatter = JS("App.formatYear")) |>
+    #     echarts4r$e_tooltip()
+    # )
+    #
+    # output$table <- renderReactable(
+    #   data |>
+    #     reactable()
+    # )
 
     observeEvent(input$go_to_types, {
       change_page("types")

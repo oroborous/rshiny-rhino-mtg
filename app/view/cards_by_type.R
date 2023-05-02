@@ -62,32 +62,46 @@ ui <- function(id, setPicker) {
 }
 
 #' @export
-server <- function (id, data, selectedSets) {
-  stopifnot(is.reactive(selectedSets))
-  stopifnot(is.reactive(data))
+server <- function (id, userSetsR, selectedSetsR) {
 
   moduleServer(id, function(input, output, session) {
 
-    df <- reactive(data() |> filter(name %in% selectedSets()))
+    #df <- reactive(data() |> filter(setname %in% selectedSetsR()))
 
     observe({
       updatePickerInput(session=session,
+                        choices=userSetsR(),
                         inputId="set",
-                        selected=selectedSets())
+                        selected=selectedSetsR())
     })
+
+    observeEvent(
+      input$set_open,
+      {
+        if (!isTRUE(input$set_open)) {
+          #output$temp <- renderPrint(selectedSetsR())
+          selectedSetsR(input$set)
+        }
+      }
+    )
 
     observeEvent(input$set, ignoreInit = FALSE, {
-      #output$temp <- renderPrint(input$set)
-      selectedSets(input$set)
+      #output$temp <- renderPrint(selectedSetsR())
+      selectedSetsR(input$set)
     })
 
-    output$chart <- renderEcharts4r(
-      mtg$chart(df())
-    )
-
-    output$table <- renderReactable(
-      mtg$table(df())
-    )
+    # output$chart <- renderEcharts4r(
+    #   data |>
+    #     echarts4r$e_chart(code) |>
+    #     echarts4r$e_bar(totalsetsize) |>
+    #     # echarts4r$e_x_axis(Year, formatter = JS("App.formatYear")) |>
+    #     echarts4r$e_tooltip()
+    # )
+    #
+    # output$table <- renderReactable(
+    #   data |>
+    #     reactable()
+    # )
 
     observeEvent(input$go_to_prices, {
       change_page("prices")

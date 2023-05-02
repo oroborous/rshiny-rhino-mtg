@@ -50,28 +50,35 @@ ui <- function(id) {
 }
 
 #' @export
-server <- function (id, data, selectedSets) {
+server <- function (id, userSetsR, selectedSetsR) {
 
   moduleServer(id, function(input, output, session) {
-    df <- reactive(data() |> filter(name %in% selectedSets()))
+    #df <- reactive(data() |> filter(name %in% selectedSetsR()))
 
     observe({
       updatePickerInput(session=session,
                         inputId="set",
-                        selected=selectedSets())
+                        choices=userSetsR(),
+                        selected=selectedSetsR())
     })
 
-    observeEvent(input$set, ignoreInit = FALSE, {
-      selectedSets(input$set)
-    })
-
-    output$table <- renderReactable(
-      mtg$table(df())
+    observeEvent(
+      input$set_open,
+      {
+        if (!isTRUE(input$set_open)) {
+          #output$temp <- renderPrint(selectedSetsR())
+          selectedSetsR(input$set)
+        }
+      }
     )
 
-    output$chart <- renderEcharts4r(
-      mtg$chart(df())
-    )
+    # output$table <- renderReactable(
+    #   mtg$table(df())
+    # )
+    #
+    # output$chart <- renderEcharts4r(
+    #   mtg$chart(df())
+    # )
 
     observeEvent(input$go_to_list, {
       change_page("list")

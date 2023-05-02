@@ -63,28 +63,41 @@ ui <- function(id) {
 }
 
 #' @export
-server <- function (id, data, selectedSets) {
+server <- function (id, userSetsR, selectedSetsR) {
 
   moduleServer(id, function(input, output, session) {
-    df <- reactive(data() |> filter(name %in% selectedSets()))
+
+    #df <- reactive(data() |> filter(setname %in% selectedSetsR()))
 
     observe({
       updatePickerInput(session=session,
                         inputId="set",
-                        selected=selectedSets())
+                        choices=userSetsR(),
+                        selected=selectedSetsR())
     })
 
-    observeEvent(input$set, ignoreInit = FALSE, {
-      selectedSets(input$set)
-    })
-
-    output$chart <- renderEcharts4r(
-      mtg$chart(df())
+    observeEvent(
+      input$set_open,
+      {
+        if (!isTRUE(input$set_open)) {
+          #output$temp <- renderPrint(selectedSetsR())
+          selectedSetsR(input$set)
+        }
+      }
     )
 
-    output$table <- renderReactable(
-      mtg$table(df())
-    )
+    # output$chart <- renderEcharts4r(
+    #   data |>
+    #     echarts4r$e_chart(code) |>
+    #     echarts4r$e_bar(totalsetsize) |>
+    #     # echarts4r$e_x_axis(Year, formatter = JS("App.formatYear")) |>
+    #     echarts4r$e_tooltip()
+    # )
+    #
+    # output$table <- renderReactable(
+    #   data |>
+    #     reactable()
+    # )
 
     observeEvent(input$go_to_trades, {
       change_page("trades")
