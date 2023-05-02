@@ -79,7 +79,9 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
                                         "/",
                                         length(userSetsR()),
                                         "/",
-                                        length(selectedSetsR()))
+                                        length(selectedSetsR()),
+                                        "/",
+                                        ordering())
                                  )
 
       updatePickerInput(session=session,
@@ -87,8 +89,6 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
                         choices=userSetsR(),
                         selected=selectedSetsR())
     })
-
-    # apply the ordering dropdown to the data
 
     # only update set selections when the picker input window closes
     observeEvent(
@@ -101,13 +101,14 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
     )
 
     display <- reactive(input$showing)
+    ordering <- reactive(input$ordering)
 
     output$chart <- echarts4r$renderEcharts4r(
       if (display() == "numcards")
          df() |>
             filter(setname %in% selectedSetsR()) |>
             group_by(grouptype) |>
-            arrange(desc(percentowned)) |>
+            arrange(!!rlang::sym(ordering())) |>
             echarts4r$e_chart(setcode, reorder=FALSE) |>
             echarts4r$e_bar(numcards) |>
           # echarts4r$e_x_axis(Year, formatter = JS("App.formatYear")) |>
@@ -116,7 +117,7 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
          df() |>
             filter(setname %in% selectedSetsR()) |>
             group_by(grouptype) |>
-            arrange(desc(percentowned)) |>
+            arrange(!!rlang::sym(ordering())) |>
             echarts4r$e_chart(setcode, reorder=FALSE) |>
             echarts4r$e_bar(avgretailprice) |>
             # echarts4r$e_x_axis(Year, formatter = JS("App.formatYear")) |>
@@ -126,6 +127,7 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
     output$table <- renderReactable(
       df() |>
         filter(setname %in% selectedSetsR()) |>
+        arrange(releasedate, grouptype) |>
         reactable()
     )
 
