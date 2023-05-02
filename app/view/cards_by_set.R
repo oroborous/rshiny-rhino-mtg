@@ -7,7 +7,7 @@ box::use(
         h2, moduleServer, NS, observeEvent, reactive, selectInput],
   shiny.router[change_page],
   shinyWidgets[updatePickerInput],
-  reactable[reactableOutput, renderReactable, getReactableState],
+  reactable[reactable, reactableOutput, renderReactable, getReactableState],
   echarts4r[echarts4rOutput, renderEcharts4r],
   shinyBS[bsCollapse, bsCollapsePanel],
 )
@@ -66,7 +66,7 @@ server <- function (id, userSetsR, selectedSetsR) {
 
   moduleServer(id, function(input, output, session) {
 
-    #df <- reactive(data() |> filter(setname %in% dfSelectedSetsR()))
+    df <- reactive(mtg$fetch_cards_by_set()() |> filter(setname %in% selectedSetsR()))
 
     observe({
       updatePickerInput(session=session,
@@ -92,11 +92,11 @@ server <- function (id, userSetsR, selectedSetsR) {
     #     # echarts4r$e_x_axis(Year, formatter = JS("App.formatYear")) |>
     #     echarts4r$e_tooltip()
     # )
-    #
-    # output$table <- renderReactable(
-    #   data |>
-    #     reactable()
-    # )
+
+    output$table <- renderReactable(
+      df() |>
+        reactable()
+    )
 
     observeEvent(input$go_to_types, {
       change_page("types")
