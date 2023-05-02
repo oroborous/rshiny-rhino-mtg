@@ -4,7 +4,8 @@ box::use(
   dplyr[filter, group_by, arrange, select],
   shiny[actionButton, column, div, bootstrapPage,
         verbatimTextOutput, renderPrint, observe,
-        h2, moduleServer, NS, observeEvent, reactive, selectInput],
+        h2, moduleServer, NS, observeEvent, reactive,
+        selectInput, reactiveVal],
   shiny.router[change_page],
   shinyWidgets[updatePickerInput],
   reactable[reactable, reactableOutput, renderReactable, getReactableState],
@@ -68,14 +69,19 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
 
   moduleServer(id, function(input, output, session) {
 
-    df <- reactive(mtg$fetch_cards_by_set(useremailR()) |>
-                     filter(setname %in% selectedSetsR()) |>
-                     group_by(grouptype) |>
-                     arrange(desc(percentowned)))
+    df <- reactiveVal()
 
-    # update set choices when a new user's data is loaded
+    # update everything when a new user's data is loaded
     observeEvent(useremailR(), {
-      output$temp <- renderPrint(nrow(df()))
+      df(mtg$fetch_cards_by_set(useremailR()))
+
+      output$temp <- renderPrint(paste0(nrow(df()),
+                                        "/",
+                                        length(userSetsR()),
+                                        "/",
+                                        length(selectedSetsR()))
+                                 )
+
       updatePickerInput(session=session,
                         inputId="set",
                         choices=userSetsR(),
@@ -99,20 +105,27 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
     output$chart <- echarts4r$renderEcharts4r(
       if (display() == "numcards")
          df() |>
-           echarts4r$e_chart(setcode, reorder=FALSE) |>
-           echarts4r$e_bar(numcards) |>
+            filter(setname %in% selectedSetsR()) |>
+            group_by(grouptype) |>
+            arrange(desc(percentowned)) |>
+            echarts4r$e_chart(setcode, reorder=FALSE) |>
+            echarts4r$e_bar(numcards) |>
           # echarts4r$e_x_axis(Year, formatter = JS("App.formatYear")) |>
-           echarts4r$e_tooltip()
+            echarts4r$e_tooltip()
        else
          df() |>
-          echarts4r$e_chart(setcode) |>
-          echarts4r$e_bar(avgretailprice) |>
-          # echarts4r$e_x_axis(Year, formatter = JS("App.formatYear")) |>
-          echarts4r$e_tooltip()
+            filter(setname %in% selectedSetsR()) |>
+            group_by(grouptype) |>
+            arrange(desc(percentowned)) |>
+            echarts4r$e_chart(setcode, reorder=FALSE) |>
+            echarts4r$e_bar(avgretailprice) |>
+            # echarts4r$e_x_axis(Year, formatter = JS("App.formatYear")) |>
+            echarts4r$e_tooltip()
     )
 
     output$table <- renderReactable(
       df() |>
+        filter(setname %in% selectedSetsR()) |>
         reactable()
     )
 
