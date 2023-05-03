@@ -114,6 +114,7 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
                     .groups="drop") |>
           as.data.frame() |>
           group_by(grouptype) |>
+          arrange(!!rlang::sym(display()), .by_group=TRUE) |>
           echarts4r$e_charts_(breakout(), reorder=FALSE) |>
           echarts4r$e_bar_(display()) |>
           # echarts4r$e_x_axis(Year, formatter = JS("App.formatYear")) |>
@@ -125,7 +126,7 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
       df() |>
         filter(setname %in% selectedSetsR()) |>
         group_by(grouptype, !!rlang::sym(breakout())) |>
-        summarise(sumcnumcards=sum(numcards),
+        summarise(sumnumcards=sum(numcards),
                   sumavgretailprice=sum(avgretailprice),
                   .groups="drop") |>
         reactable()
