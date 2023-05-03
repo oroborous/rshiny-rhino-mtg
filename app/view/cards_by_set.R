@@ -24,12 +24,14 @@ ui <- function(id, setPicker) {
     div(class="container",
         div(class="row",
             div(class="col-3",
-                selectInput(ns("ordering"), "Order By", c("Set Release Date" = "releasedate",
-                                                          "Percent of Set Complete" = "percentowned"))
+                selectInput(ns("ordering"), "Order columns by",
+                            c("the release date of the set" = "releasedate",
+                              "the percent the set I own" = "percentowned"))
             ),
             div(class="col-3",
-                selectInput(ns("showing"), "Show", c("Number of Cards" = "numcards",
-                                                     "Dollar Value of Cards" = "avgretailprice"))
+                selectInput(ns("showing"), "Columns height indicates the",
+                            c("number of cards" = "numcards",
+                              "dollar value of the cards" = "avgretailprice"))
             ),
             div(class="col",
               mtg$set_picker_input(ns("set"))
@@ -75,15 +77,15 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
     observeEvent(useremailR(), {
       df(mtg$fetch_cards_by_set(useremailR()))
 
-      output$temp <- renderPrint(paste0(nrow(df()),
-                                        "/",
-                                        length(userSetsR()),
-                                        "/",
-                                        length(selectedSetsR()),
-                                        "/",
+      # debug output
+      output$temp <- renderPrint(paste0(nrow(df()), "/",
+                                        length(userSetsR()), "/",
+                                        length(selectedSetsR()), "/",
                                         ordering())
                                  )
 
+      # update the options in the set picker to only include
+      # sets this user owns
       updatePickerInput(session=session,
                         inputId="set",
                         choices=userSetsR(),
@@ -100,10 +102,12 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
       }
     )
 
+    # reactives for the dropdown box values
     display <- reactive(input$showing)
     ordering <- reactive(input$ordering)
 
     output$chart <- echarts4r$renderEcharts4r(
+      # !!rlang::sym() doesn't work for e_bar, alas
       if (display() == "numcards")
          df() |>
             filter(setname %in% selectedSetsR()) |>
@@ -131,6 +135,7 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
         reactable()
     )
 
+    # listen for button click
     observeEvent(input$go_to_types, {
       change_page("types")
     })

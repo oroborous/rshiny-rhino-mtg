@@ -44,6 +44,23 @@ fetch_cards_by_set <- function(useremail) {
   df
 }
 
+#' @export
+fetch_cards_by_type <- function(useremail) {
+  cards_by_type_query <- paste0("select b.* from v_cards_by_type b ",
+                              	"join v_user_sets c on (b.setcode = c.setcode) ",
+                              	"where b.grouptype in ($1, 'all') ",
+                              	"and c.useremail = $2 ",
+                              	"order by setcode, grouptype, cardtype")
+  cards_by_type_result <- dbSendQuery(con, cards_by_type_query)
+  dbBind(cards_by_type_result, list(useremail, useremail))
+
+  df <- dbFetch(cards_by_type_result)
+
+  dbClearResult(cards_by_type_result)
+
+  df
+}
+
 
 #' @export
 set_picker_input <- function(id) {
