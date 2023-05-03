@@ -1,10 +1,10 @@
 # app/view/cards_by_set.R
 
 box::use(
-  dplyr[filter, group_by, arrange, select],
+  dplyr[filter, group_by, arrange],
   shiny[actionButton, column, div, bootstrapPage,
-        verbatimTextOutput, renderPrint, observe,
-        h2, moduleServer, NS, observeEvent, reactive,
+        verbatimTextOutput, renderPrint,
+        moduleServer, NS, observeEvent, reactive,
         selectInput, reactiveVal],
   shiny.router[change_page],
   shinyWidgets[updatePickerInput],
@@ -106,26 +106,37 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
     display <- reactive(input$showing)
     ordering <- reactive(input$ordering)
 
+    # output$chart <- echarts4r$renderEcharts4r(
+    #   # !!rlang::sym() doesn't work for e_bar, alas
+    #   if (display() == "numcards")
+    #      df() |>
+    #         filter(setname %in% selectedSetsR()) |>
+    #         group_by(grouptype) |>
+    #         arrange(!!rlang::sym(ordering())) |>
+    #         echarts4r$e_chart(setcode, reorder=FALSE) |>
+    #         echarts4r$e_bar(numcards) |>
+    #       # echarts4r$e_x_axis(Year, formatter = JS("App.formatYear")) |>
+    #         echarts4r$e_tooltip()
+    #    else
+    #      df() |>
+    #         filter(setname %in% selectedSetsR()) |>
+    #         group_by(grouptype) |>
+    #         arrange(!!rlang::sym(ordering())) |>
+    #         echarts4r$e_chart(setcode, reorder=FALSE) |>
+    #         echarts4r$e_bar(avgretailprice) |>
+    #         # echarts4r$e_x_axis(Year, formatter = JS("App.formatYear")) |>
+    #         echarts4r$e_tooltip()
+    # )
+
     output$chart <- echarts4r$renderEcharts4r(
-      # !!rlang::sym() doesn't work for e_bar, alas
-      if (display() == "numcards")
-         df() |>
-            filter(setname %in% selectedSetsR()) |>
-            group_by(grouptype) |>
-            arrange(!!rlang::sym(ordering())) |>
-            echarts4r$e_chart(setcode, reorder=FALSE) |>
-            echarts4r$e_bar(numcards) |>
+        df() |>
+          filter(setname %in% selectedSetsR()) |>
+          group_by(grouptype) |>
+          arrange(ordering()) |>
+          echarts4r$e_chart(setcode, reorder=FALSE) |>
+          echarts4r$e_bar_(display()) |>
           # echarts4r$e_x_axis(Year, formatter = JS("App.formatYear")) |>
-            echarts4r$e_tooltip()
-       else
-         df() |>
-            filter(setname %in% selectedSetsR()) |>
-            group_by(grouptype) |>
-            arrange(!!rlang::sym(ordering())) |>
-            echarts4r$e_chart(setcode, reorder=FALSE) |>
-            echarts4r$e_bar(avgretailprice) |>
-            # echarts4r$e_x_axis(Year, formatter = JS("App.formatYear")) |>
-            echarts4r$e_tooltip()
+          echarts4r$e_tooltip()
     )
 
     output$table <- renderReactable(
