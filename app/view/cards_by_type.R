@@ -119,7 +119,8 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
           echarts4r$e_bar_(display()) |>
           # echarts4r$e_x_axis(Year, formatter = JS("App.formatYear")) |>
           echarts4r$e_flip_coords() |>
-          echarts4r$e_tooltip()
+          echarts4r$e_tooltip() |>
+          echarts4r$e_mark_point(title="Max!", serie="all", data = list(name="Max", type = "max"))
     )
 
     output$table <- renderReactable(

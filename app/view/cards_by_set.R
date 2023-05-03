@@ -132,11 +132,12 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
         df() |>
           filter(setname %in% selectedSetsR()) |>
           group_by(grouptype) |>
-          arrange(ordering()) |>
+          arrange(!!rlang::sym(ordering()), .by_group=TRUE) |>
           echarts4r$e_chart(setcode, reorder=FALSE) |>
           echarts4r$e_bar_(display()) |>
           # echarts4r$e_x_axis(Year, formatter = JS("App.formatYear")) |>
-          echarts4r$e_tooltip()
+          echarts4r$e_tooltip() |>
+          echarts4r$e_mark_point(title="Max!", data = list(name="Max", type = "max"))
     )
 
     output$table <- renderReactable(
