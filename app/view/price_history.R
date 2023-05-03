@@ -1,16 +1,17 @@
 # app/view/price_history.R
 
 box::use(
-  dplyr[filter, group_by, arrange, summarise],
+  dplyr[filter, group_by, arrange, summarise, full_join, mutate],
   shiny[actionButton, column, div, bootstrapPage,
         verbatimTextOutput, renderPrint,
         moduleServer, NS, observeEvent, reactive,
-        selectInput, reactiveVal],
+        selectInput, reactiveVal, observe],
   shiny.router[change_page],
   shinyWidgets[updatePickerInput],
   reactable[reactable, reactableOutput, renderReactable, getReactableState],
   echarts4r,
   shinyBS[bsCollapse, bsCollapsePanel],
+  stats[smooth],
 )
 box::use(
   app/logic/mtg
@@ -101,25 +102,40 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
     )
 
     # reactives for the dropdown box values
-    display <- reactive(input$showing)
-    breakout <- reactive(input$breakout)
+    priceset <- reactive(input$priceset)
+    priceowned <- reactive(input$priceowned)
 
-    output$chart <- echarts4r$renderEcharts4r(
-      df() |>
+    observe({
+
+      data <- df() |>
         filter(setname %in% selectedSetsR()) |>
         group_by(grouptype) |>
-        echarts4r$e_chart(pricedate) |>
-        echarts4r$e_line(avgretailprice) |>
-        # echarts4r$e_x_axis(Year, formatter = JS("App.formatYear")) |>
-        echarts4r$e_tooltip() |>
-        echarts4r$e_mark_point(title="Max!", serie="all", data = list(name="Max", type = "max"))
-    )
+        mutate(smoothretail = as.numeric(smooth(avgretailprice, kind = "3RS3R"))) |>
+        mutate(smoothbuylist = as.numeric(smooth(avgbuylistprice, kind = "3RS3R")))
 
-    output$table <- renderReactable(
-      df() |>
-        filter(setname %in% selectedSetsR()) |>
-        reactable()
-    )
+      #smooth <- data.frame(supsmu(data$pricedate, data$avgretailprice))
+
+      #data <- full_join(data, smooth, by=c("pricedate" = "x"))
+
+      output$chart <- echarts4r$renderEcharts4r(
+        data |>
+          #filter(setname %in% selectedSetsR()) |>
+          #group_by(grouptype) |>
+          echarts4r$e_chart(pricedate) |>
+          echarts4r$e_line(avgretailprice) |>
+          # echarts4r$e_x_axis(Year, formatter = JS("App.formatYear")) |>
+          echarts4r$e_tooltip() |>
+          echarts4r$e_mark_point(title="Max!", serie="all", data = list(name="Max", type = "max"))
+      )
+
+      output$table <- renderReactable(
+        data |>
+          #filter(setname %in% selectedSetsR()) |>
+          reactable()
+      )
+    })
+
+
 
     observeEvent(input$go_to_trades, {
       change_page("trades")
