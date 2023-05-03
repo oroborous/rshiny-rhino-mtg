@@ -61,6 +61,27 @@ fetch_cards_by_type <- function(useremail) {
   df
 }
 
+#' @export
+fetch_price_history <- function(useremail) {
+  price_history_query <- paste0("select grouptype, b.setname, pricedate, ",
+                                "sum(avgretailprice) as avgretailprice, ",
+                              	"sum(avgbuylistprice) as avgbuylistprice from mv_price_history b ",
+                              	"join v_user_sets c on (b.setcode = c.setcode) ",
+                              	"where b.grouptype in ($1, 'all') ",
+                              	"and c.useremail = $2 ",
+                              	"group by grouptype, b.setname, pricedate ",
+                              	"order by grouptype, pricedate")
+
+  price_history_result <- dbSendQuery(con, price_history_query)
+  dbBind(price_history_result, list(useremail, useremail))
+
+  df <- dbFetch(price_history_result)
+
+  dbClearResult(price_history_result)
+
+  df
+}
+
 
 #' @export
 set_picker_input <- function(id) {

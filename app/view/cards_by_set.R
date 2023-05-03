@@ -77,12 +77,11 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
     observeEvent(useremailR(), {
       df(mtg$fetch_cards_by_set(useremailR()))
 
-      # debug output
-      output$temp <- renderPrint(paste0(nrow(df()), "/",
-                                        length(userSetsR()), "/",
-                                        length(selectedSetsR()), "/",
-                                        ordering())
-                                 )
+      # # debug output
+      # output$temp <- renderPrint(paste0(nrow(df()), "/",
+      #                                   length(userSetsR()), "/",
+      #                                   length(selectedSetsR()), "/",
+      #                                   ordering())                                 )
 
       # update the options in the set picker to only include
       # sets this user owns

@@ -76,12 +76,11 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
     observeEvent(useremailR(), {
       df(mtg$fetch_cards_by_type(useremailR()))
 
-      # debug output
-      output$temp <- renderPrint(paste0(nrow(df()), "/",
-                                        length(userSetsR()), "/",
-                                        length(selectedSetsR()), "/",
-                                        breakout())
-      )
+      # # debug output
+      # output$temp <- renderPrint(paste0(nrow(df()), "/",
+      #                                   length(userSetsR()), "/",
+      #                                   length(selectedSetsR()), "/",
+      #                                   breakout()))
 
       # update the options in the set picker to only include
       # sets this user owns
@@ -126,13 +125,11 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
     output$table <- renderReactable(
       df() |>
         filter(setname %in% selectedSetsR()) |>
-        group_by(grouptype, !!rlang::sym(breakout())) |>
-        summarise(sumnumcards=sum(numcards),
-                  sumavgretailprice=sum(avgretailprice),
-                  .groups="drop") |>
+        arrange(releasedate, grouptype) |>
         reactable()
     )
 
+    # listen for button click
     observeEvent(input$go_to_prices, {
       change_page("prices")
     })
