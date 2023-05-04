@@ -72,17 +72,21 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
     observeEvent(useremailR(), {
       df(mtg$fetch_price_history(useremailR()))
 
-      # debug output
-      # output$temp <- renderPrint(paste0(nrow(df()), "/",
-      #                                   length(userSetsR()), "/",
-      #                                   length(selectedSetsR()), "/",
-      #                                   breakout()))
-
       # update the options in the set picker to only include
       # sets this user owns
       updatePickerInput(session=session,
                         inputId="set",
                         choices=userSetsR(),
+                        selected=selectedSetsR())
+    })
+
+    observe({
+      # debug output
+      output$temp <- renderPrint(selectedSetsR())
+
+      # update the selected options in this picker when they change on any page
+      updatePickerInput(session=session,
+                        inputId="set",
                         selected=selectedSetsR())
     })
 

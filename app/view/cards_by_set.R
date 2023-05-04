@@ -5,7 +5,7 @@ box::use(
   shiny[actionButton, column, div, bootstrapPage,
         verbatimTextOutput, renderPrint,
         moduleServer, NS, observeEvent, reactive,
-        selectInput, reactiveVal],
+        selectInput, reactiveVal, observe],
   shiny.router[change_page],
   shinyWidgets[updatePickerInput],
   reactable[reactable, reactableOutput, renderReactable],
@@ -77,12 +77,6 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
     observeEvent(useremailR(), {
       df(mtg$fetch_cards_by_set(useremailR()))
 
-      # # debug output
-      # output$temp <- renderPrint(paste0(nrow(df()), "/",
-      #                                   length(userSetsR()), "/",
-      #                                   length(selectedSetsR()), "/",
-      #                                   ordering())                                 )
-
       # update the options in the set picker to only include
       # sets this user owns
       updatePickerInput(session=session,
@@ -101,31 +95,19 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
       }
     )
 
+    observe({
+      # debug output
+      output$temp <- renderPrint(selectedSetsR())
+
+      # update the selected options in this picker when they change on any page
+      updatePickerInput(session=session,
+                        inputId="set",
+                        selected=selectedSetsR())
+    })
+
     # reactives for the dropdown box values
     display <- reactive(input$showing)
     ordering <- reactive(input$ordering)
-
-    # output$chart <- echarts4r$renderEcharts4r(
-    #   # !!rlang::sym() doesn't work for e_bar, alas
-    #   if (display() == "numcards")
-    #      df() |>
-    #         filter(setname %in% selectedSetsR()) |>
-    #         group_by(grouptype) |>
-    #         arrange(!!rlang::sym(ordering())) |>
-    #         echarts4r$e_chart(setcode, reorder=FALSE) |>
-    #         echarts4r$e_bar(numcards) |>
-    #       # echarts4r$e_x_axis(Year, formatter = JS("App.formatYear")) |>
-    #         echarts4r$e_tooltip()
-    #    else
-    #      df() |>
-    #         filter(setname %in% selectedSetsR()) |>
-    #         group_by(grouptype) |>
-    #         arrange(!!rlang::sym(ordering())) |>
-    #         echarts4r$e_chart(setcode, reorder=FALSE) |>
-    #         echarts4r$e_bar(avgretailprice) |>
-    #         # echarts4r$e_x_axis(Year, formatter = JS("App.formatYear")) |>
-    #         echarts4r$e_tooltip()
-    # )
 
     output$chart <- echarts4r$renderEcharts4r(
         df() |>
