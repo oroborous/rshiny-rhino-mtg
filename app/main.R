@@ -15,7 +15,7 @@ ui <- function(id) {
     div(class = "container mt-5",
     div(class = "row",
       div(class = "col",
-        tags$h1("Magic: The Gathering Set Collector"),
+        tags$h1(class="logo", "Magic: The Gathering Set Collector"),
         tags$nav(class = "navbar",
           tags$ul(class = "nav navbar-nav",
             tags$li(a("Home", href = route_link("/"))),

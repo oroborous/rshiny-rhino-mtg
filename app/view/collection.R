@@ -2,7 +2,7 @@
 
 box::use(
   shiny[actionButton, column, div, bootstrapPage,
-        fileInput, textInput, p, verbatimTextOutput, renderText,
+        fileInput, textInput, p, textOutput, renderText,
         h2, moduleServer, NS, observeEvent],
   shiny.router[change_page],
 )
@@ -31,24 +31,24 @@ ui <- function(id) {
           p("Just want to explore? Enter 'stacy@email.com' above.")
       )
     ),
-    div(class="row",
-        div(class="col",
-          verbatimTextOutput(ns("temp"))
+    div(class="row mt-5",
+        div(class="col text-center",
+          p(textOutput(ns("temp")))
         )
     )
   )
 }
 
 #' @export
-server <- function(id, useremail) {
+server <- function(id, useremailR) {
 
   moduleServer(id, function(input, output, session) {
     observeEvent(input$go_to_sets, {
       change_page("sets")
-      useremail(input$useremail)
+      useremailR(input$useremail)
     })
 
-    output$temp <- renderText(useremail());
+    output$temp <- renderText("App is ready!");
 
   })
 }

@@ -22,3 +22,10 @@ body {
   @include shadow;
   padding: 10px;
 }
+
+.logo {
+  background-image: url("/static/images/logo.png");
+  background-repeat: no-repeat;
+  background-position: left;
+  background-size: contain;
+}
