@@ -64,7 +64,7 @@ server <- function(id) {
     cards_by_set$server("sets", userSetsR, selectedSetsR, useremailR)
     cards_by_type$server("types", userSetsR, selectedSetsR, useremailR)
     price_history$server("prices", userSetsR, selectedSetsR, useremailR)
-    trades$server("trades", userSetsR, selectedSetsR)
+    trades$server("trades", userSetsR, selectedSetsR, useremailR)
     list$server("list")
   })
 }

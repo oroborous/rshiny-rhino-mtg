@@ -1,14 +1,14 @@
 # app/view/price_history.R
 
 box::use(
-  dplyr[filter, group_by, arrange, summarise, across, mutate, ungroup],
+  dplyr[filter, group_by, arrange, summarise, across, mutate],
   shiny[actionButton, column, div, bootstrapPage,
         verbatimTextOutput, renderPrint,
         moduleServer, NS, observeEvent, reactive,
         selectInput, reactiveVal, observe],
   shiny.router[change_page],
   shinyWidgets[updatePickerInput],
-  reactable[reactable, reactableOutput, renderReactable, getReactableState],
+  reactable[reactable, reactableOutput, renderReactable],
   echarts4r,
   shinyBS[bsCollapse, bsCollapsePanel],
   stats[smooth],
@@ -29,11 +29,6 @@ ui <- function(id) {
                             c("Purchase Price (Retail)" = "smoothretail",
                               "Selling Price (Buylist)" = "smoothbuylist"))
             ),
-            # div(class="col-3",
-            #     selectInput(ns("priceowned"), "Price list for your cards",
-            #                 c("Purchase Price (Retail)" = "avgretailprice",
-            #                   "Selling Price (Buylist)" = "avgbuylistprice"))
-            # ),
             div(class="col",
                 mtg$set_picker_input(ns("set"))
             )
@@ -103,7 +98,6 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
 
     # reactives for the dropdown box values
     pricelist <- reactive(input$pricelist)
-    #priceowned <- reactive(input$priceowned)
 
     observe({
 

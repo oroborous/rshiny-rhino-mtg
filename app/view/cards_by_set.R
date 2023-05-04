@@ -8,7 +8,7 @@ box::use(
         selectInput, reactiveVal],
   shiny.router[change_page],
   shinyWidgets[updatePickerInput],
-  reactable[reactable, reactableOutput, renderReactable, getReactableState],
+  reactable[reactable, reactableOutput, renderReactable],
   echarts4r,
   shinyBS[bsCollapse, bsCollapsePanel],
 )

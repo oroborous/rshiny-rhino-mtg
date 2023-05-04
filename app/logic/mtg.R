@@ -82,6 +82,42 @@ fetch_price_history <- function(useremail) {
   df
 }
 
+#' @export
+fetch_user_cards <- function(useremail) {
+  user_cards_query <- paste0("select setname, releasedate, cardname, type, color, ",
+                             "avgbuylistprice, numowned ",
+                             "from v_user_cards ",
+                             "where useremail = $1")
+
+  user_cards_result <- dbSendQuery(con, user_cards_query)
+  dbBind(user_cards_result, list(useremail))
+
+  df <- dbFetch(user_cards_result)
+
+  dbClearResult(user_cards_result)
+
+  df
+}
+
+#' @export
+fetch_completion_prices <- function(useremail) {
+  completion_prices_query <- paste0("select setname, sum(avgretailprice) as avgretailprice from ( ",
+                            	"select setname, uuid, avgretailprice from v_set_cards ",
+                            	"except ",
+                            	"select setname, uuid, avgretailprice from v_user_cards ",
+                            	"where useremail = $1 ",
+                              ") as missing_cards ",
+                              "group by setname")
+  completion_prices_result <- dbSendQuery(con, completion_prices_query)
+  dbBind(completion_prices_result, list(useremail))
+
+  df <- dbFetch(completion_prices_result)
+
+  dbClearResult(completion_prices_result)
+
+  df
+}
+
 
 #' @export
 set_picker_input <- function(id) {

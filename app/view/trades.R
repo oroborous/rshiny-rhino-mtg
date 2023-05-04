@@ -1,13 +1,17 @@
 # app/view/trades.R
 
 box::use(
-  dplyr[filter],
-  shiny[actionButton, column, div, bootstrapPage, observe,
-        h2, moduleServer, NS, observeEvent, reactive, selectInput],
+  dplyr[filter, group_by, arrange, summarise],
+  shiny[actionButton, column, div, bootstrapPage,
+        verbatimTextOutput, renderPrint,
+        moduleServer, NS, observeEvent, reactive,
+        selectInput, reactiveVal],
   shiny.router[change_page],
   shinyWidgets[updatePickerInput],
-  reactable[reactableOutput, renderReactable, getReactableState],
-  echarts4r[echarts4rOutput, renderEcharts4r],
+  reactable[reactable, reactableOutput, renderReactable],
+  echarts4r,
+  shinyBS[bsCollapse, bsCollapsePanel],
+  tibble[add_column, add_row]
 )
 box::use(
   app/logic/mtg
@@ -22,18 +26,21 @@ ui <- function(id) {
         div(class="row",
             div(class="col-3",
                 selectInput(ns("hiding"), "Hide cards with less than",
-                            c("Show All", "4 copies owned", "8 copies owned"))
+                            c("Show All" = "1000000",
+                              "4 copies owned by me" = "4",
+                              "8 copies owned by me" = "8"))
             ),
             div(class="col",
                 mtg$set_picker_input(ns("set"))
             )
         ),
+        div(class="row", div(class="col", verbatimTextOutput(ns("temp")))),
         div(class="row",
-            div(class="col-6",
-                reactableOutput(ns("table"))
+            div(class="col-3",
+                echarts4r$echarts4rOutput(ns("chart"))
             ),
-            div(class="col-6",
-                echarts4rOutput(ns("chart"))
+            div(class="col-9",
+                reactableOutput(ns("table"))
             )
         ),
         div(class="row",
@@ -50,35 +57,67 @@ ui <- function(id) {
 }
 
 #' @export
-server <- function (id, userSetsR, selectedSetsR) {
+server <- function (id, userSetsR, selectedSetsR, useremailR) {
 
   moduleServer(id, function(input, output, session) {
-    #df <- reactive(data() |> filter(name %in% selectedSetsR()))
 
-    observe({
-      updatePickerInput(session=session,
-                        inputId="set",
-                        choices=userSetsR(),
-                        selected=selectedSetsR())
-    })
+      dfCards <- reactiveVal()
+      dfPrices <- reactiveVal()
 
-    observeEvent(
-      input$set_open,
-      {
-        if (!isTRUE(input$set_open)) {
-          #output$temp <- renderPrint(selectedSetsR())
-          selectedSetsR(input$set)
+      # update everything when a new user's data is loaded
+      observeEvent(useremailR(), {
+        dfCards(mtg$fetch_user_cards(useremailR()))
+        dfPrices(mtg$fetch_completion_prices(useremailR()))
+
+        # # debug output
+        # output$temp <- renderPrint(paste0(nrow(df()), "/",
+        #                                   length(userSetsR()), "/",
+        #                                   length(selectedSetsR()), "/",
+        #                                   breakout()))
+
+        # update the options in the set picker to only include
+        # sets this user owns
+        updatePickerInput(session=session,
+                          inputId="set",
+                          choices=userSetsR(),
+                          selected=selectedSetsR())
+      })
+
+      # only update set selections when the picker input window closes
+      observeEvent(
+        input$set_open,
+        {
+          if (!isTRUE(input$set_open)) {
+            selectedSetsR(input$set)
+          }
         }
-      }
-    )
+      )
 
-    # output$table <- renderReactable(
-    #   mtg$table(df())
-    # )
-    #
-    # output$chart <- renderEcharts4r(
-    #   mtg$chart(df())
-    # )
+      # reactives for the dropdown box values
+      hiding <- reactive(input$hiding)
+
+      output$chart <- echarts4r$renderEcharts4r(
+        dfPrices() |>
+          filter(setname %in% selectedSetsR()) |>
+          summarise(dollars=sum(avgretailprice)) |>
+          as.data.frame() |>
+          add_column(grouptype = "Funds Needed") |>
+          add_row(grouptype="Your Trade Value", dollars=0) |>
+          group_by(grouptype) |>
+          echarts4r$e_charts(grouptype, reorder=FALSE) |>
+          echarts4r$e_bar(dollars) |>
+          # echarts4r$e_x_axis(Year, formatter = JS("App.formatYear")) |>
+          echarts4r$e_tooltip()
+      )
+
+      output$table <- renderReactable(
+        dfCards() |>
+          filter(setname %in% selectedSetsR()) |>
+          add_column("numtotrade", 0) |>
+          add_column("tradevalue", 0) |>
+          arrange(desc(avgbuylistprice), desc(numowned)) |>
+          reactable()
+      )
 
     observeEvent(input$go_to_list, {
       change_page("list")
