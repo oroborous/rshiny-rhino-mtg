@@ -1,7 +1,7 @@
 # app/view/price_history.R
 
 box::use(
-  dplyr[filter, group_by, arrange, summarise, full_join, mutate],
+  dplyr[filter, group_by, arrange, summarise, across, mutate, ungroup],
   shiny[actionButton, column, div, bootstrapPage,
         verbatimTextOutput, renderPrint,
         moduleServer, NS, observeEvent, reactive,
@@ -25,15 +25,15 @@ ui <- function(id) {
     div(class="container",
         div(class="row",
             div(class="col-3",
-                selectInput(ns("priceset"), "Price list for all set cards",
-                            c("Purchase Price (Retail)" = "avgretailprice",
-                              "Selling Price (Buylist)" = "avgbuylistprice"))
+                selectInput(ns("pricelist"), "Price list to display",
+                            c("Purchase Price (Retail)" = "smoothretail",
+                              "Selling Price (Buylist)" = "smoothbuylist"))
             ),
-            div(class="col-3",
-                selectInput(ns("priceowned"), "Price list for your cards",
-                            c("Purchase Price (Retail)" = "avgretailprice",
-                              "Selling Price (Buylist)" = "avgbuylistprice"))
-            ),
+            # div(class="col-3",
+            #     selectInput(ns("priceowned"), "Price list for your cards",
+            #                 c("Purchase Price (Retail)" = "avgretailprice",
+            #                   "Selling Price (Buylist)" = "avgbuylistprice"))
+            # ),
             div(class="col",
                 mtg$set_picker_input(ns("set"))
             )
@@ -102,35 +102,34 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
     )
 
     # reactives for the dropdown box values
-    priceset <- reactive(input$priceset)
-    priceowned <- reactive(input$priceowned)
+    pricelist <- reactive(input$pricelist)
+    #priceowned <- reactive(input$priceowned)
 
     observe({
 
       data <- df() |>
         filter(setname %in% selectedSetsR()) |>
-        group_by(grouptype) |>
+        group_by(grouptype, pricedate) |>
+        summarise(across(c(avgretailprice, avgbuylistprice), sum)) |>
+       # smooth over some gaps in the price data (some cards missing on some days)
         mutate(smoothretail = as.numeric(smooth(avgretailprice, kind = "3RS3R"))) |>
         mutate(smoothbuylist = as.numeric(smooth(avgbuylistprice, kind = "3RS3R")))
 
-      #smooth <- data.frame(supsmu(data$pricedate, data$avgretailprice))
-
-      #data <- full_join(data, smooth, by=c("pricedate" = "x"))
-
       output$chart <- echarts4r$renderEcharts4r(
-        data |>
-          #filter(setname %in% selectedSetsR()) |>
-          #group_by(grouptype) |>
+        chart <- data |>
           echarts4r$e_chart(pricedate) |>
-          echarts4r$e_line(avgretailprice) |>
+          echarts4r$e_line_(pricelist(), smooth = TRUE) |>
+          echarts4r$e_datazoom(type = "slider", showDetail = FALSE) |>
           # echarts4r$e_x_axis(Year, formatter = JS("App.formatYear")) |>
           echarts4r$e_tooltip() |>
-          echarts4r$e_mark_point(title="Max!", serie="all", data = list(name="Max", type = "max"))
+          echarts4r$e_mark_line(data=list(type = "average", name = "Average")) |>
+          echarts4r$e_mark_point(title="Max!", serie="all", data = list(name="Max", type = "max")) |>
+          echarts4r$e_mark_point(title="Max!", serie=useremailR(), data = list(name="Max", type = "max"))
       )
 
       output$table <- renderReactable(
-        data |>
-          #filter(setname %in% selectedSetsR()) |>
+        df() |>
+          filter(setname %in% selectedSetsR()) |>
           reactable()
       )
     })
