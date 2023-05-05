@@ -5,7 +5,8 @@ box::use(
   shiny[actionButton, column, div, bootstrapPage,
         verbatimTextOutput, renderPrint, h4, p,
         moduleServer, NS, observeEvent, reactive,
-        selectInput, reactiveVal, observe],
+        selectInput, reactiveVal, observe,
+        downloadButton, downloadHandler],
   shiny.router[change_page],
   shinyWidgets[updatePickerInput],
   reactable[reactable, reactableOutput, renderReactable,
@@ -13,7 +14,8 @@ box::use(
   echarts4r,
   shinyBS[bsCollapse, bsCollapsePanel],
   tibble[add_column, add_row],
-  htmlwidgets[JS],
+  stringr[str_replace_all],
+  utils[write.csv]
 )
 box::use(
   app/logic/mtg
@@ -30,7 +32,8 @@ ui <- function(id) {
             p(paste0("Plan your trade in advance using the latest buylist prices. Don't settle for ",
                      "a below-market offer -- know the value of your cards!")),
             p(paste0("First, select the set(s) you want to complete. The cost of the cards you don't own will ",
-                     "be displayed as Funds Needed. Adjust the quantities in the table until Your Trade Value matches it."))
+                     "be displayed as Funds Needed. Adjust the quantities in the table until Your Trade Value matches it.")),
+            p("Note: The '# to Trade' column is not currently interactive. In the meantime, you have been granted a $15,000 trade value. Congrats!")
         ),
         div(class="row",
             div(class="col-3",
@@ -56,9 +59,9 @@ ui <- function(id) {
         ),
         div(class="row",
             div(class="col-4 offset-8 text-right",
-                actionButton(
-                  inputId=ns("go_to_list"),
-                  label="Print this Trade List!",
+                downloadButton(
+                  outputId=ns("download"),
+                  label="Download this Trade List!",
                   class="btn-primary btn-lg"
                 )
             )
@@ -90,7 +93,7 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
 
       observe({
         # debug output
-        # output$temp <- renderPrint(selectedSetsR())
+        # output$temp <- renderPrint(str_replace_all(c(useremailR()), "[^a-zA-Z0-9]", "-"))
 
         # update the selected options in this picker when they change on any page
         updatePickerInput(session=session,
@@ -117,13 +120,12 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
           summarise(dollars=sum(avgretailprice)) |>
           as.data.frame() |>
           add_column(grouptype="Funds Needed") |>
-          add_row(grouptype="Your Trade Value", dollars=9000) |>
+          add_row(grouptype="Your Trade Value", dollars=15000) |>
           group_by(grouptype) |>
           echarts4r$e_charts(grouptype, reorder=FALSE, height="200px") |>
           echarts4r$e_bar(dollars) |>
           #echarts4r$e_y_axis(dollars, formatter = JS("App.formatDollars")) |>
           echarts4r$e_tooltip()
-          # echarts4r$e_flip_coords()
       )
 
       output$table <- renderReactable(
@@ -154,8 +156,14 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
           )
       )
 
-    observeEvent(input$go_to_list, {
-      change_page("list")
-    })
+      output$download <- downloadHandler(
+        filename = function() {
+          emailsafe <- str_replace_all(c(useremailR()), "[^a-zA-Z0-9]", "-")
+          paste(emailsafe, ".csv", sep = "")
+        },
+        content = function(file) {
+          write.csv(dfCards(), file, row.names = FALSE)
+        }
+      )
   })
 }
