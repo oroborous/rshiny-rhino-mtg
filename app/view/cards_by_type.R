@@ -59,7 +59,14 @@ ui <- function(id, setPicker) {
             )
         ),
         div(class="row",
-            div(class="col-4 offset-8 text-right",
+            div(class="col-4 text-left",
+                actionButton(
+                  inputId=ns("go_to_sets"),
+                  label="Back to Your Sets",
+                  class="btn-secondary btn-lg"
+                )
+            ),
+            div(class="col-4 offset-4 text-right",
                 actionButton(
                   inputId=ns("go_to_prices"),
                   label="Continue to Price History",
@@ -126,7 +133,6 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
           arrange(!!rlang::sym(display()), .by_group=TRUE) |>
           echarts4r$e_charts_(breakout(), reorder=FALSE) |>
           echarts4r$e_bar_(display()) |>
-          # echarts4r$e_x_axis(Year, formatter = JS("App.formatYear")) |>
           echarts4r$e_flip_coords() |>
           echarts4r$e_tooltip() |>
           echarts4r$e_mark_point(title="Max!", serie="all", data = list(name="Max", type = "max")) |>
@@ -156,7 +162,11 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
         ))
     )
 
-    # listen for button click
+    # listen for button clicks
+    observeEvent(input$go_to_sets, {
+      change_page("sets")
+    })
+
     observeEvent(input$go_to_prices, {
       change_page("prices")
     })

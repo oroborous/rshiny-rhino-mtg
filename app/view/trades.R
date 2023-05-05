@@ -58,7 +58,14 @@ ui <- function(id) {
             )
         ),
         div(class="row",
-            div(class="col-4 offset-8 text-right",
+            div(class="col-4 text-left",
+                actionButton(
+                  inputId=ns("go_to_prices"),
+                  label="Back to Price History",
+                  class="btn-secondary btn-lg"
+                )
+            ),
+            div(class="col-4 offset-4 text-right",
                 downloadButton(
                   outputId=ns("download"),
                   label="Download this Trade List!",
@@ -122,7 +129,7 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
           add_column(grouptype="Funds Needed") |>
           add_row(grouptype="Your Trade Value", dollars=15000) |>
           group_by(grouptype) |>
-          echarts4r$e_charts(grouptype, reorder=FALSE, height="200px") |>
+          echarts4r$e_charts(grouptype, reorder=FALSE, height="100px") |>
           echarts4r$e_bar(dollars) |>
           #echarts4r$e_y_axis(dollars, formatter = JS("App.formatDollars")) |>
           echarts4r$e_tooltip()
@@ -136,7 +143,9 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
           arrange(desc(avgbuylistprice), desc(numowned)) |>
           reactable(filterable=TRUE,
                     searchable=TRUE,
-                    #class="small",
+                    showPageSizeOptions = TRUE,
+                    pageSizeOptions = c(5, 10, 20),
+                    defaultPageSize = 5,
                     columns = list(
                       setname = colDef(name="Set Name"),
                       releasedate = colDef(name="Release Date",
@@ -155,6 +164,11 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
                       tradevalue = colDef(name="Trade Value"))
           )
       )
+
+      # listen for button clicks
+      observeEvent(input$go_to_prices, {
+        change_page("prices")
+      })
 
       output$download <- downloadHandler(
         filename = function() {

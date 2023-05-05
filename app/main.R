@@ -1,5 +1,5 @@
 box::use(shiny[bootstrapPage, moduleServer, NS, observe,
-               titlePanel, div, tags, a, reactiveVal],
+               titlePanel, div, tags, a, reactiveVal, HTML],
          shiny.router[router_ui, router_server,
                       route, route_link],
          bslib[bs_theme])
@@ -13,6 +13,7 @@ ui <- function(id) {
 
   bootstrapPage(
     theme = bs_theme(version = 4),
+    tags$head(HTML("<title>Magic: The Gathering Set Collector</title>")),
     div(class = "container mt-5",
     div(class = "row",
       div(class = "col",

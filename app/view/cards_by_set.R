@@ -64,7 +64,14 @@ ui <- function(id, setPicker) {
             )
         ),
         div(class="row",
-            div(class="col-4 offset-8 text-right",
+            div(class="col-4 text-left",
+                actionButton(
+                  inputId=ns("go_to_login"),
+                  label="Back to Login",
+                  class="btn-secondary btn-lg"
+                )
+            ),
+            div(class="col-4 offset-4 text-right",
                 actionButton(
                   inputId=ns("go_to_types"),
                   label="Continue to Cards by Type",
@@ -154,7 +161,11 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
         ))
     )
 
-    # listen for button click
+    # listen for button clicks
+    observeEvent(input$go_to_login, {
+      change_page("/")
+    })
+
     observeEvent(input$go_to_types, {
       change_page("types")
     })

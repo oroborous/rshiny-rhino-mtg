@@ -55,7 +55,14 @@ ui <- function(id) {
             )
         ),
         div(class="row",
-            div(class="col-4 offset-8 text-right",
+            div(class="col-4 text-left",
+                actionButton(
+                  inputId=ns("go_to_types"),
+                  label="Back to Cards by Type",
+                  class="btn-secondary btn-lg"
+                )
+            ),
+            div(class="col-4 offset-4 text-right",
                 actionButton(
                   inputId=ns("go_to_trades"),
                   label="Continue to Trade Builder",
@@ -152,7 +159,10 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
       )
     })
 
-
+    # listen for buttons clicks
+    observeEvent(input$go_to_types, {
+      change_page("types")
+    })
 
     observeEvent(input$go_to_trades, {
       change_page("trades")

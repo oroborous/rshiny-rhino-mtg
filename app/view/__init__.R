@@ -8,6 +8,5 @@ box::use(
   app/view/cards_by_type,
   app/view/price_history,
   app/view/trades,
-  app/view/list,
   app/view/page_404
 )
