@@ -8,11 +8,18 @@ box::use(
 )
 
 con <- dbConnect(RPostgres::Postgres(),
-                      host="localhost",
-                      dbname="postgres",
-                      user="postgres",
-                      password="T1t@nPps",
-                      port=5432)
+                     host="localhost",
+                     dbname="postgres",
+                     user="postgres",
+                     password="T1t@nPps",
+                     port=5432)
+
+# Digital Ocean credentials
+# con <- dbConnect(RPostgres::Postgres(),
+#                       host="localhost",
+#                       dbname="defaultdb",
+#                       user="doadmin",
+#                       port=5432)
 
 
 #' @export
