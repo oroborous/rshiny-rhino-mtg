@@ -12,7 +12,8 @@ box::use(
             colDef, colFormat],
   echarts4r,
   shinyBS[bsCollapse, bsCollapsePanel],
-  tibble[add_column, add_row]
+  tibble[add_column, add_row],
+  htmlwidgets[JS],
 )
 box::use(
   app/logic/mtg
@@ -37,10 +38,12 @@ ui <- function(id) {
         ),
         div(class="row", div(class="col", verbatimTextOutput(ns("temp")))),
         div(class="row",
-            div(class="col-3",
+            div(class="col",
                 echarts4r$echarts4rOutput(ns("chart"))
-            ),
-            div(class="col-9",
+            )
+        ),
+        div(class="row",
+            div(class="col",
                 reactableOutput(ns("table"))
             )
         ),
@@ -106,24 +109,25 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
           filter(setname %in% selectedSetsR()) |>
           summarise(dollars=sum(avgretailprice)) |>
           as.data.frame() |>
-          add_column(grouptype = "Funds Needed") |>
+          add_column(grouptype="Funds Needed") |>
           add_row(grouptype="Your Trade Value", dollars=9000) |>
           group_by(grouptype) |>
-          echarts4r$e_charts(grouptype, reorder=FALSE) |>
+          echarts4r$e_charts(grouptype, reorder=FALSE, height="200px") |>
           echarts4r$e_bar(dollars) |>
-          # echarts4r$e_x_axis(Year, formatter = JS("App.formatYear")) |>
+          #echarts4r$e_y_axis(dollars, formatter = JS("App.formatDollars")) |>
           echarts4r$e_tooltip()
+          # echarts4r$e_flip_coords()
       )
 
       output$table <- renderReactable(
         dfCards() |>
-          filter(setname %in% selectedSetsR()) |>
           filter(numowned < hiding()) |>
           add_column(numtotrade=0) |>
           add_column(tradevalue=0) |>
           arrange(desc(avgbuylistprice), desc(numowned)) |>
           reactable(filterable=TRUE,
                     searchable=TRUE,
+                    #class="small",
                     columns = list(
                       setname = colDef(name="Set Name"),
                       releasedate = colDef(name="Release Date",
@@ -137,7 +141,8 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
                                                                separators=TRUE,
                                                                digits=2)),
                       numowned = colDef(name="# You Own"),
-                      numtotrade = colDef(name="# To Trade"),
+                      numtotrade = colDef(name="# To Trade",
+                                          cell=function(value) {paste0("\u2796  ", value, "  \u2795")}),
                       tradevalue = colDef(name="Trade Value"))
           )
       )
