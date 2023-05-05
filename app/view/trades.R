@@ -3,7 +3,7 @@
 box::use(
   dplyr[filter, group_by, arrange, summarise],
   shiny[actionButton, column, div, bootstrapPage,
-        verbatimTextOutput, renderPrint,
+        verbatimTextOutput, renderPrint, h4, p,
         moduleServer, NS, observeEvent, reactive,
         selectInput, reactiveVal, observe],
   shiny.router[change_page],
@@ -25,6 +25,13 @@ ui <- function(id) {
 
   bootstrapPage(
     div(class="container",
+        div(class="col callout callout-default",
+            h4("Get a Fair Deal"),
+            p(paste0("Plan your trade in advance using the latest buylist prices. Don't settle for ",
+                     "a below-market offer -- know the value of your cards!")),
+            p(paste0("First, select the set(s) you want to complete. The cost of the cards you don't own will ",
+                     "be displayed as Funds Needed. Adjust the quantities in the table until Your Trade Value matches it."))
+        ),
         div(class="row",
             div(class="col-3",
                 selectInput(ns("hiding"), "Hide cards with less than",

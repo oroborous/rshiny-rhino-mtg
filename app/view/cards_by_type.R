@@ -3,7 +3,7 @@
 box::use(
   dplyr[filter, group_by, arrange, summarise],
   shiny[actionButton, column, div, bootstrapPage,
-        verbatimTextOutput, renderPrint,
+        verbatimTextOutput, renderPrint, h4, p,
         moduleServer, NS, observeEvent, reactive,
         selectInput, reactiveVal, observe],
   shiny.router[change_page],
@@ -23,6 +23,11 @@ ui <- function(id, setPicker) {
 
   bootstrapPage(
     div(class="container",
+        div(class="col callout callout-default",
+            h4("Got a Deck In Mind?"),
+            p(paste0("Looking for some new cards for your blue/green deck? Or maybe you'd prefer artifacts? ",
+                     "Take a look to see which sets will give you more of the cards you want to play with!"))
+        ),
         div(class="row",
             div(class="col-3",
                 selectInput(ns("breakout"), "Breakout columns by",

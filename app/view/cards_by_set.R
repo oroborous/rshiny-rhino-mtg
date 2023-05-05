@@ -3,7 +3,7 @@
 box::use(
   dplyr[filter, group_by, arrange],
   shiny[actionButton, column, div, bootstrapPage,
-        verbatimTextOutput, renderPrint,
+        verbatimTextOutput, renderPrint, p, h4,
         moduleServer, NS, observeEvent, reactive,
         selectInput, reactiveVal, observe],
   shiny.router[change_page],
@@ -24,6 +24,14 @@ ui <- function(id, setPicker) {
 
   bootstrapPage(
     div(class="container",
+        div(class="row",
+            div(class="col callout callout-default",
+                h4("Sets in Your Collection"),
+                p(paste0("Your journey begins here. Do you know which sets you're closest to completing? ",
+                         "Or which of your partial sets are worth the most money? Find out below!")),
+                p(paste0("Hint: For a detailed view of the chart data, click the More Details link below."))
+            )
+        ),
         div(class="row",
             div(class="col-3",
                 selectInput(ns("ordering"), "Order columns by",

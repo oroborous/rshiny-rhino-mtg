@@ -3,7 +3,7 @@
 box::use(
   dplyr[filter, group_by, arrange, summarise, across, mutate],
   shiny[actionButton, column, div, bootstrapPage,
-        verbatimTextOutput, renderPrint,
+        verbatimTextOutput, renderPrint, h4, p,
         moduleServer, NS, observeEvent, reactive,
         selectInput, reactiveVal, observe],
   shiny.router[change_page],
@@ -24,6 +24,11 @@ ui <- function(id) {
 
   bootstrapPage(
     div(class="container",
+        div(class="col callout callout-default",
+            h4("Timing Is Everything"),
+            p(paste0("Don't buy when the market is high! Find the sets with retail prices trending downwards, ",
+                     "and sell your cards from sets with buylist prices on the rise."))
+        ),
         div(class="row",
             div(class="col-3",
                 selectInput(ns("pricelist"), "Price list to display",
