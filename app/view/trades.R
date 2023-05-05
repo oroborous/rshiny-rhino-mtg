@@ -8,7 +8,8 @@ box::use(
         selectInput, reactiveVal, observe],
   shiny.router[change_page],
   shinyWidgets[updatePickerInput],
-  reactable[reactable, reactableOutput, renderReactable],
+  reactable[reactable, reactableOutput, renderReactable,
+            colDef, colFormat],
   echarts4r,
   shinyBS[bsCollapse, bsCollapsePanel],
   tibble[add_column, add_row]
@@ -79,7 +80,7 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
 
       observe({
         # debug output
-        output$temp <- renderPrint(selectedSetsR())
+        # output$temp <- renderPrint(selectedSetsR())
 
         # update the selected options in this picker when they change on any page
         updatePickerInput(session=session,
@@ -106,7 +107,7 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
           summarise(dollars=sum(avgretailprice)) |>
           as.data.frame() |>
           add_column(grouptype = "Funds Needed") |>
-          add_row(grouptype="Your Trade Value", dollars=0) |>
+          add_row(grouptype="Your Trade Value", dollars=9000) |>
           group_by(grouptype) |>
           echarts4r$e_charts(grouptype, reorder=FALSE) |>
           echarts4r$e_bar(dollars) |>
@@ -117,10 +118,28 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
       output$table <- renderReactable(
         dfCards() |>
           filter(setname %in% selectedSetsR()) |>
-          add_column("numtotrade", 0) |>
-          add_column("tradevalue", 0) |>
+          filter(numowned < hiding()) |>
+          add_column(numtotrade=0) |>
+          add_column(tradevalue=0) |>
           arrange(desc(avgbuylistprice), desc(numowned)) |>
-          reactable()
+          reactable(filterable=TRUE,
+                    searchable=TRUE,
+                    columns = list(
+                      setname = colDef(name="Set Name"),
+                      releasedate = colDef(name="Release Date",
+                                           format = colFormat(date=TRUE,
+                                                              locales="en-US")),
+                      cardname = colDef(name="Card Name"),
+                      type = colDef(name="Card Type"),
+                      color = colDef(name="Card Color"),
+                      avgbuylistprice = colDef(name="Avg Buylist Price",
+                                              format=colFormat(prefix="$",
+                                                               separators=TRUE,
+                                                               digits=2)),
+                      numowned = colDef(name="# You Own"),
+                      numtotrade = colDef(name="# To Trade"),
+                      tradevalue = colDef(name="Trade Value"))
+          )
       )
 
     observeEvent(input$go_to_list, {

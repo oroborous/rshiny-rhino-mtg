@@ -8,7 +8,8 @@ box::use(
         selectInput, reactiveVal, observe],
   shiny.router[change_page],
   shinyWidgets[updatePickerInput],
-  reactable[reactable, reactableOutput, renderReactable],
+  reactable[reactable, reactableOutput, renderReactable,
+            colDef, colFormat],
   echarts4r,
   shinyBS[bsCollapse, bsCollapsePanel],
 )
@@ -97,7 +98,7 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
 
     observe({
       # debug output
-      output$temp <- renderPrint(selectedSetsR())
+      # output$temp <- renderPrint(selectedSetsR())
 
       # update the selected options in this picker when they change on any page
       updatePickerInput(session=session,
@@ -125,7 +126,24 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
       df() |>
         filter(setname %in% selectedSetsR()) |>
         arrange(releasedate, grouptype) |>
-        reactable()
+        reactable(filterable=TRUE,
+                  searchable=TRUE,
+                  columns = list(
+                    grouptype = colDef(name="Owner"),
+                    setcode = colDef(name="Set Code"),
+                    setname = colDef(name="Set Name"),
+                    releasedate = colDef(name="Release Date",
+                                         format = colFormat(date=TRUE,
+                                                            locales="en-US")),
+                    numcards = colDef(name="Number of Cards"),
+                    avgretailprice = colDef(name="Avg Retail Price",
+                                            format=colFormat(prefix="$",
+                                                             separators=TRUE,
+                                                             digits=2)),
+                    percentowned = colDef(name="% of Set You Own",
+                                          format=colFormat(percent=TRUE,
+                                                           digits=1))
+        ))
     )
 
     # listen for button click

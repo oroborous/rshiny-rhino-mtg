@@ -17,18 +17,23 @@ ui <- function(id) {
   bootstrapPage(
     div(class="row",
         div(class="col card mt-3 p-3",
-            h2("Upload Your Collection"),
-            fileInput(ns("csvfile"), "Select the *.csv file that contains your collection data", buttonLabel="Upload")
+            h2("Upload your collection file"),
+            fileInput(ns("csvfile"), "Select the *.csv file that contains your collection data", buttonLabel="Upload"),
+            actionButton(
+              inputId=ns("go_to_sets"),
+              label="Upload My Collection",
+              class="btn-primary btn-lg"
+            )
         ),
-      div(class="col card mt-3 p-3",
+        div(class="col card mt-3 p-3",
           h2("View your saved collection"),
           textInput(ns("useremail"), "Enter your email to view your saved collection", value="stacy@email.com"),
+          p("Just want to explore? Enter 'stacy@email.com' above."),
           actionButton(
-            inputId=ns("go_to_sets"),
+            inputId=ns("user_upload"),
             label="View My Collection",
             class="btn-primary btn-lg"
-          ),
-          p("Just want to explore? Enter 'stacy@email.com' above.")
+          )
       )
     ),
     div(class="row mt-5",

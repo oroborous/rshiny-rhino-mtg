@@ -8,7 +8,8 @@ box::use(
         selectInput, reactiveVal, observe],
   shiny.router[change_page],
   shinyWidgets[updatePickerInput],
-  reactable[reactable, reactableOutput, renderReactable],
+  reactable[reactable, reactableOutput, renderReactable,
+            colDef, colFormat],
   echarts4r,
   shinyBS[bsCollapse, bsCollapsePanel],
 )
@@ -86,7 +87,7 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
 
     observe({
       # debug output
-      output$temp <- renderPrint(selectedSetsR())
+      # output$temp <- renderPrint(selectedSetsR())
 
       # update the selected options in this picker when they change on any page
       updatePickerInput(session=session,
@@ -123,14 +124,31 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
           # echarts4r$e_x_axis(Year, formatter = JS("App.formatYear")) |>
           echarts4r$e_flip_coords() |>
           echarts4r$e_tooltip() |>
-          echarts4r$e_mark_point(title="Max!", serie="all", data = list(name="Max", type = "max"))
+          echarts4r$e_mark_point(title="Max!", serie="all", data = list(name="Max", type = "max")) |>
+          echarts4r$e_mark_point(title="Max!", serie=useremailR(), data = list(name="Max", type = "max"))
     )
 
     output$table <- renderReactable(
       df() |>
         filter(setname %in% selectedSetsR()) |>
         arrange(releasedate, grouptype) |>
-        reactable()
+        reactable(filterable=TRUE,
+                  searchable=TRUE,
+                  columns = list(
+                    grouptype = colDef(name="Owner"),
+                    setcode = colDef(name="Set Code"),
+                    setname = colDef(name="Set Name"),
+                    releasedate = colDef(name="Release Date",
+                                         format = colFormat(date=TRUE,
+                                                            locales="en-US")),
+                    cardtype = colDef(name="Card Type"),
+                    color = colDef(name="Card Color"),
+                    numcards = colDef(name="Number of Cards"),
+                    avgretailprice = colDef(name="Avg Retail Price",
+                                            format=colFormat(prefix="$",
+                                                             separators=TRUE,
+                                                             digits=2))
+        ))
     )
 
     # listen for button click

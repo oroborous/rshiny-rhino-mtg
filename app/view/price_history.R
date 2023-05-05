@@ -8,7 +8,8 @@ box::use(
         selectInput, reactiveVal, observe],
   shiny.router[change_page],
   shinyWidgets[updatePickerInput],
-  reactable[reactable, reactableOutput, renderReactable],
+  reactable[reactable, reactableOutput, renderReactable,
+            colDef, colFormat],
   echarts4r,
   shinyBS[bsCollapse, bsCollapsePanel],
   stats[smooth],
@@ -82,7 +83,7 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
 
     observe({
       # debug output
-      output$temp <- renderPrint(selectedSetsR())
+      # output$temp <- renderPrint(selectedSetsR())
 
       # update the selected options in this picker when they change on any page
       updatePickerInput(session=session,
@@ -128,7 +129,21 @@ server <- function (id, userSetsR, selectedSetsR, useremailR) {
       output$table <- renderReactable(
         df() |>
           filter(setname %in% selectedSetsR()) |>
-          reactable()
+          reactable(filterable=TRUE,
+                    searchable=TRUE,
+                    columns = list(
+                      grouptype = colDef(name="Owner"),
+                      setname = colDef(name="Set Name"),
+                      pricedate = colDef(name="Release Date"),
+                      avgretailprice = colDef(name="Avg Retail Price",
+                                              format=colFormat(prefix="$",
+                                                               separators=TRUE,
+                                                               digits=2)),
+                      avgbuylistprice = colDef(name="Avg Buylist Price",
+                                              format=colFormat(prefix="$",
+                                                               separators=TRUE,
+                                                               digits=2))
+                    ))
       )
     })
 
